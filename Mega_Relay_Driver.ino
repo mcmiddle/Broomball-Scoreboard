@@ -1,5 +1,7 @@
 //Code written by Jordan Grider to for an Arduino Mega to control 7-segment output for a relay board
+#include "PCA9685.h"
 
+/*
 //*** Start editing here ***
 
 char Arduino = 'F';
@@ -133,31 +135,31 @@ byte seven_seg_digits_inverted[11][7] = {
     0,0,0,0,0,0,0   } 
 };
 
-int led = 22;
-int inint = 0;
-char incoming = 'a';
-boolean serialRX = false;
-
 boolean seg1change = false;
 boolean seg2change = false;
 boolean seg3change = false;
 boolean seg4change = false;
 
-char currentaddr = 'Z';
-
 int seg1val = -1;
 int seg2val = -1;
 int seg3val = -1;
 int seg4val = -1;
+*/
+int led = 22;
+int inint = 0;
+char incoming = 'a';
+boolean serialRX = false;
+
+char currentaddr = 'Z';
 
 
 void setup() {                
+  /*
   // initialize the digital pin as an output.
   for (int pin = 22; pin < 54; pin++){
     pinMode(pin, OUTPUT); 
     digitalWrite(pin, HIGH); 
   }
-
   if(seg1dot) {
     digitalWrite(29, LOW); 
   }
@@ -170,9 +172,54 @@ void setup() {
   if(seg4dot) {
     digitalWrite(53, LOW); 
   }
+*/
 
+  Wire.begin();
   Serial1.begin(9600);
-  Serial.begin(9600);  
+  Serial.begin(9600);  // For debugging to terminal
+  
+  PCA9685 pwmHomeScore;
+  PCA9685 pwmVisitorScore;
+  PCA9685 pwmPeriod;
+  PCA9685 pwmTimeMintues;
+  PCA9685 pwmTimeSeconds;
+  PCA9685 pwmHomePenaltyTopMinutes;
+  PCA9685 pwmHomePenaltyTopSeconds;
+  PCA9685 pwmHomePenaltyBottomMinutes;
+  PCA9685 pwmHomePenaltyBottomSeconds;
+  PCA9685 pwmAwayPenaltyTopMinutes;
+  PCA9685 pwmAwayPenaltyTopSeconds;
+  PCA9685 pwmAwayPenaltyBottomMinutes;
+  PCA9685 pwmAwayPenaltyBottomSeconds;
+  
+  pwmHomeScore.begin(10001010);
+  pwmVisitorScore.begin(10001000);
+  pwmPeriod.begin(10011110);
+  pwmTimeMintues.begin(10100000);
+  pwmTimeSeconds.begin(10100010);
+  pwmHomePenaltyTopMinutes.begin(10010110);
+  pwmHomePenaltyTopSeconds.begin(10011000);
+  pwmHomePenaltyBottomMinutes.begin(10011010);
+  pwmHomePenaltyBottomSeconds.begin(10011100);
+  pwmAwayPenaltyTopMinutes.begin(10001110);
+  pwmAwayPenaltyTopSeconds.begin(10010000);
+  pwmAwayPenaltyBottomMinutes.begin(10010010);
+  pwmAwayPenaltyBottomSeconds.begin(10010100);
+  
+  pwmHomeScore.init();
+  pwmVisitorScore.init();
+  pwmPeriod.init();
+  pwmTimeMintues.init();
+  pwmTimeSeconds.init();
+  pwmHomePenaltyTopMinutes.init();
+  pwmHomePenaltyTopSeconds.init();
+  pwmHomePenaltyBottomMinutes.init();
+  pwmHomePenaltyBottomSeconds.init();
+  pwmAwayPenaltyTopMinutes.init();
+  pwmAwayPenaltyTopSeconds.init();
+  pwmAwayPenaltyBottomMinutes.init();
+  pwmAwayPenaltyBottomSeconds.init();
+  
 
 }
 
@@ -264,7 +311,7 @@ void serialEvent1() {
       number = -1;
     }
 
-
+	// If a number, display. Else set it as address.
     if (number < 10 && number >= -1){
       if (currentaddr == seg1addr){
         seg1val = number;
