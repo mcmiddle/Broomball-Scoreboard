@@ -1,6 +1,10 @@
 //Code written by Jordan Grider to for an Arduino Mega to control 7-segment output for a relay board
 #include "PCA9685.h"
 
+unsigned char chipAddr = 0; //Address of chip to update
+unsigned char writeValue = 0; //Value to be displayed
+unsigned short int chipPins = 0; //Pin's corresponding to the display being updated
+
 /*
 //*** Start editing here ***
 
@@ -219,60 +223,19 @@ void setup() {
   pwmAwayPenaltyTopSeconds.init();
   pwmAwayPenaltyBottomMinutes.init();
   pwmAwayPenaltyBottomSeconds.init();
-  
-
 }
 
 
 void loop() {
 
   if (serialRX && Debugger){
-    Serial.println(seg1val);
-    Serial.println(seg2val);
-    Serial.println(seg3val);
-    Serial.println(seg4val);
+	Serial.println(chipAddr);
+    Serial.println(writeValue);
+	Serial.println(chipPins);
     serialRX = false;
   }  
 
-  if (seg1change){
-    if (seg1inv) {
-      sevenSegWriteInverted(seg1val,22);
-    } 
-    else {
-      sevenSegWrite(seg1val,22);
-    }
-    seg1change = false;
-  }
-
-  if (seg2change){
-    if (seg2inv) {
-      sevenSegWriteInverted(seg2val,30);
-    } 
-    else {
-      sevenSegWrite(seg2val,30);
-    }
-    seg2change = false;
-  }
-  if (seg3change){
-    if (seg3inv) {
-      sevenSegWriteInverted(seg3val,38);
-    } 
-    else {
-      sevenSegWrite(seg3val,38);
-    }
-    seg3change = false;
-  }
-  if (seg4change){
-    if (seg4inv) {
-      sevenSegWriteInverted(seg4val,46);
-    } 
-    else {
-      sevenSegWrite(seg4val,46);
-    }
-    seg4change = false;
-  }
-
-
+  //TODO: Add Loop Logic
 }
 
 void sevenSegWrite(int number, byte pin) {
@@ -303,8 +266,7 @@ void sevenSegWriteInverted(int number, byte pin) {
 void serialEvent1() {
   while (Serial1.available()) {
     char inChar = (char)Serial1.read();
-    Serial1.print(inChar);
-
+    //Serial1.print(inChar);
 
     int number = inChar - '0';
     if (inChar == '/'){
@@ -313,22 +275,162 @@ void serialEvent1() {
 
 	// If a number, display. Else set it as address.
     if (number < 10 && number >= -1){
-      if (currentaddr == seg1addr){
-        seg1val = number;
-        seg1change = true;
-      }
-      if (currentaddr == seg2addr){ 
-        seg2val = number;
-        seg2change = true;
-      }
-      if (currentaddr == seg3addr){
-        seg3val = number;
-        seg3change = true;
-      }
-      if (currentaddr == seg4addr){
-        seg4val = number;
-        seg4change = true;
-      }
+	  switch(currentaddr){
+		//Home Score 10s
+	    case H:
+		  chipAddr = currentAdr
+		  writeValue = number;
+		  changePins;
+		  
+		  break;
+		//Home Score 1s
+		case G:
+		  chipAddr = currentAdr
+		  writeValue = number;
+		  changePins;
+		  
+		  break;
+		//Away Score 10s
+		case B:
+		  chipAddr = currentAdr
+		  writeValue = number;
+		  changePins;
+		  
+		  break;
+		//Away Score 1s
+		case A:
+		  chipAddr = currentAdr
+		  writeValue = number;
+		  changePins;
+		  
+		  break;
+		//Time Minutes 10s
+		case F:
+		  chipAddr = currentAdr
+		  writeValue = number;
+		  changePins;
+		  
+		  break;
+		//Time Minutes 1s
+		case E:
+		  chipAddr = currentAdr
+		  writeValue = number;
+		  changePins;
+		  
+		  break;
+		//Time Seconds 10s
+		case D:
+		  chipAddr = currentAdr
+		  writeValue = number;
+		  changePins;
+		  
+		  break;
+		//Time Seconds 1s
+		case C:
+		  chipAddr = currentAdr
+		  writeValue = number;
+		  changePins;
+		  
+		  break;
+		//Home Penalty Top Minutes 1s
+		case N:
+		  chipAddr = currentAdr
+		  writeValue = number;
+		  changePins;
+		  
+		  break;
+		//Home Penalty Top Seconds 10s
+		case M:
+		  chipAddr = currentAdr
+		  writeValue = number;
+		  changePins;
+		  
+		  break;
+		//Home Penalty Top Seconds 1s
+		case L:
+		  chipAddr = currentAdr
+		  writeValue = number;
+		  changePins;
+		  
+		  break;
+		//Home Penalty Bottom Minutes 1s
+		case T:
+		  chipAddr = currentAdr
+		  writeValue = number;
+		  changePins;
+		  
+		  break;
+		//Home Penalty Bottom Seconds 10s
+		case S:
+		  chipAddr = currentAdr
+		  writeValue = number;
+		  changePins;
+		  
+		  break;
+		//Home Penalty Bottom Seconds 1s
+		case R:
+		  chipAddr = currentAdr
+		  writeValue = number;
+		  changePins;
+		  
+		  break;
+		//Away Penalty Top Minutes 1s
+		case K:
+		  chipAddr = currentAdr
+		  writeValue = number;
+		  changePins;
+		  
+		  break;
+		//Away Penalty Top Seconds 10s
+		case J:
+		  chipAddr = currentAdr
+		  writeValue = number;
+		  changePins;
+		  
+		  break;
+		//Away Penalty Top Seconds 1s
+		case I:
+		  chipAddr = currentAdr
+		  writeValue = number;
+		  changePins;
+		  
+		  break;
+		//Away Penalty Bottom Minutes 1s
+		case Q:
+		  chipAddr = currentAdr
+		  writeValue = number;
+		  changePins;
+		  
+		  break;
+		//Away Penalty Bottom Seconds 10s
+		case P:
+		  chipAddr = currentAdr
+		  writeValue = number;
+		  changePins;
+		  
+		  break;
+		//Away Penalty Bottom Seconds 1s
+		case O:
+		  chipAddr = currentAdr
+		  writeValue = number;
+		  changePins;
+		  
+		  break;
+		//Period
+		case U:
+		  chipAddr = currentAdr
+		  writeValue = number;
+		  changePins;
+		  
+		  break;
+		//Horn
+		case V:
+		  chipAddr = currentAdr
+		  writeValue = number;
+		  changePins;
+		  
+		  break;
+	  }
       currentaddr = 'Z';
     }
 
