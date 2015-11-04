@@ -1,10 +1,11 @@
 //Code written by Jordan Grider to for an Arduino Mega to control 7-segment output for a relay board
 #include "PCA9685.h"
 
+unsigned char update = 0; 	//flag set when new data recieved from ref-controller
 unsigned char chipAddr = 0; //Address of chip to update
 unsigned char writeValue = 0; //Value to be displayed
-unsigned short int chipPins = 0; //Pin's corresponding to the display being updated
-
+int chipStartPin = 0; //Pin corresponding to starting location of the display being updated at the given chip address
+byte brightness;    //TODO set initial value
 /*
 //*** Start editing here ***
 
@@ -227,17 +228,198 @@ void setup() {
 
 
 void loop() {
-
+    unsigned char decodedValue = 0;
+    int i, j;
+	
   if (serialRX && Debugger){
 	Serial.println(chipAddr);
     Serial.println(writeValue);
 	Serial.println(chipPins);
     serialRX = false;
   }  
+  
+  //TODO handle brightness logic
+  
+  //Display update logic
+  if (update == 1){
+  	//handle horn operation
+  	    //TODO
+  	
+  	//Decode the display value
+  	decodedValue = sevenSegDecode(writeValue);
+  	
+  	//Write the value to the display
+  	for (i = chipStartPin; i<chipStartPin + 7; i ++){
+  	    j = 0;
+  	    //case statemnt to determine which pwm object to apply changes to based on chipAddr
+  	    switch(chipAddr){
+  	        case H :
+  	            if(((decodedValue >> j) & 0x01) == 0){   
+      	            pwmHomeScore.setLEDOff(i)
+  	            } else {
+  	                pwmHomeScore.setLEDDimmed(i, brightness);
+  	            }
+  	            break;
+  	        case G :
+  	            if(((decodedValue >> j) & 0x01) == 0){   
+      	            pwmHomeScore.setLEDOff(i)
+  	            } else {
+  	                pwmHomeScore.setLEDDimmed(i, brightness);
+  	            }
+  	            break;
+  	        case B :
+  	            if(((decodedValue >> j) & 0x01) == 0){   
+      	            pwmVisitorScore.setLEDOff(i)
+  	            } else {
+  	                pwmVisitorScore.setLEDDimmed(i, brightness);
+  	            }
+  	            break;
+  	        case A :
+  	            if(((decodedValue >> j) & 0x01) == 0){   
+      	            pwmVisitorScore.setLEDOff(i)
+  	            } else {
+  	                pwmVisitorScore.setLEDDimmed(i, brightness);
+  	            }
+  	            break;
+  	        case F :
+  	            if(((decodedValue >> j) & 0x01) == 0){   
+      	            pwmTimeMinutes.setLEDOff(i)
+  	            } else {
+  	                pwmTimeMinutes.setLEDDimmed(i, brightness);
+  	            }
+  	            break;
+  	        case E :
+  	            if(((decodedValue >> j) & 0x01) == 0){   
+      	            pwmTimeMinutes.setLEDOff(i)
+  	            } else {
+  	                pwmTimeMinutes.setLEDDimmed(i, brightness);
+  	            }
+  	            break;
+  	        case D :
+  	            if(((decodedValue >> j) & 0x01) == 0){   
+      	            pwmTimeSeconds.setLEDOff(i)
+  	            } else {
+  	                pwmTimeSeconds.setLEDDimmed(i, brightness);
+  	            }
+  	            break;
+  	        case C :
+  	            if(((decodedValue >> j) & 0x01) == 0){   
+      	            pwmTimeSeconds.setLEDOff(i)
+  	            } else {
+  	                pwmTimeSeconds.setLEDDimmed(i, brightness);
+  	            }
+  	            break;
+  	        case N :
+  	            if(((decodedValue >> j) & 0x01) == 0){   
+      	            pwmHomePenaltyTopMinutes.setLEDOff(i)
+  	            } else {
+  	                pwmHomePenaltyTopMinutes.setLEDDimmed(i, brightness);
+  	            }
+  	            break;
+  	        case M :
+  	            if(((decodedValue >> j) & 0x01) == 0){   
+      	            pwmHomePenaltyTopSeconds.setLEDOff(i)
+  	            } else {
+  	                pwmHomePenaltyTopSeconds.setLEDDimmed(i, brightness);
+  	            }
+  	            break;
+  	        case L :
+  	            if(((decodedValue >> j) & 0x01) == 0){   
+      	            pwmHomePenaltyTopSeconds.setLEDOff(i)
+  	            } else {
+  	                pwmHomePenaltyTopSeconds.setLEDDimmed(i, brightness);
+  	            }
+  	            break;
+  	        case T :
+  	            if(((decodedValue >> j) & 0x01) == 0){   
+      	            pwmHomePenaltyBottomMinutes.setLEDOff(i)
+  	            } else {
+  	                pwmHomePenaltyBottomMinutes.setLEDDimmed(i, brightness);
+  	            }
+  	            break;
+  	        case S :
+  	            if(((decodedValue >> j) & 0x01) == 0){   
+      	            pwmHomePenaltyBottomSeconds.setLEDOff(i)
+  	            } else {
+  	                pwmHomePenaltyBottomSeconds.setLEDDimmed(i, brightness);
+  	            }
+  	            break;
+  	        case R :
+  	            if(((decodedValue >> j) & 0x01) == 0){   
+      	            pwmHomePenaltyBottomSeconds.setLEDOff(i)
+  	            } else {
+  	                pwmHomePenaltyBottomSeconds.setLEDDimmed(i, brightness);
+  	            }
+  	            break;
+  	        case K :
+  	            if(((decodedValue >> j) & 0x01) == 0){   
+      	            pwmAwayPenaltyTopMinutes.setLEDOff(i)
+  	            } else {
+  	                pwmAwayPenaltyTopMinutes.setLEDDimmed(i, brightness);
+  	            }
+  	            break;
+  	        case J :
+  	            if(((decodedValue >> j) & 0x01) == 0){   
+      	            pwmAwayPenaltyTopSeconds.setLEDOff(i)
+  	            } else {
+  	                pwmAwayPenaltyTopSeconds.setLEDDimmed(i, brightness);
+  	            }
+  	            break;
+  	        case I :
+  	            if(((decodedValue >> j) & 0x01) == 0){   
+      	            pwmAwayPenaltyTopSeconds.setLEDOff(i)
+  	            } else {
+  	                pwmAwayPenaltyTopSeconds.setLEDDimmed(i, brightness);
+  	            }
+  	            break;
+  	        case Q :
+  	            if(((decodedValue >> j) & 0x01) == 0){   
+      	            pwmAwayPenaltyBottomMinutes.setLEDOff(i)
+  	            } else {
+  	                pwmAwayPenaltyBottomMinutes.setLEDDimmed(i, brightness);
+  	            }
+  	            break;
+  	        case P :
+  	            if(((decodedValue >> j) & 0x01) == 0){   
+      	            pwmAwayPenaltyBottomSeconds.setLEDOff(i)
+  	            } else {
+  	                pwmAwayPenaltyBottomSeconds.setLEDDimmed(i, brightness);
+  	            }
+  	            break;
+  	        case O :
+  	            if(((decodedValue >> j) & 0x01) == 0){   
+      	            pwmAwayPenaltyBottomSeconds.setLEDOff(i)
+  	            } else {
+  	                pwmAwayPenaltyBottomSeconds.setLEDDimmed(i, brightness);
+  	            }
+  	            break;
+  	        case U :
+  	            if(((decodedValue >> j) & 0x01) == 0){   
+      	            pwmPeriod.setLEDOff(i)
+  	            } else {
+  	                pwmPeriod.setLEDDimmed(i, brightness);
+  	            }
+  	            break;
+  	    }   //end case
+  	    j ++;
+  	} // end for
+  	
+  	//Illuminate dot if neccessary. Value > 0 : illuminate. if < 0 ignore
+  	    //TODO
+  	
+  	update = 0;	//clear the flag, wait for next update
+  } //end update block
 
-  //TODO: Add Loop Logic
+  
+}   //end loop
+
+unsigned char sevenSegDecode(unsigned char number){
+	//TODO
+	//Check with matt about different display mappings (see display.xlsx)
+	return 0;
 }
 
+/*
 void sevenSegWrite(int number, byte pin) {
   if(number == -1){
     number = 10;
@@ -261,7 +443,7 @@ void sevenSegWriteInverted(int number, byte pin) {
     ++pin;
   }
 }
-
+*/
 
 void serialEvent1() {
   while (Serial1.available()) {
@@ -280,158 +462,160 @@ void serialEvent1() {
 	    case H:
 		  chipAddr = currentAdr
 		  writeValue = number;
-		  changePins;
+		  chipStartPin = 1;	//1-7
 		  
 		  break;
 		//Home Score 1s
 		case G:
 		  chipAddr = currentAdr
 		  writeValue = number;
-		  changePins;
+		  chipStartPin = 8;	//8-14, DOT on 15
 		  
 		  break;
 		//Away Score 10s
 		case B:
 		  chipAddr = currentAdr
 		  writeValue = number;
-		  changePins;
+		  chipStartPin = 1;	//1-7
 		  
 		  break;
 		//Away Score 1s
 		case A:
 		  chipAddr = currentAdr
 		  writeValue = number;
-		  changePins;
+		  chipStartPin = 8;	//8-14	DOT on 15
 		  
 		  break;
 		//Time Minutes 10s
 		case F:
 		  chipAddr = currentAdr
 		  writeValue = number;
-		  changePins;
+		  chipStartPin = 1;	//1-7
 		  
 		  break;
 		//Time Minutes 1s
 		case E:
 		  chipAddr = currentAdr
 		  writeValue = number;
-		  changePins;
+		  chipStartPin = 8;	//8-14
 		  
 		  break;
 		//Time Seconds 10s
 		case D:
 		  chipAddr = currentAdr
 		  writeValue = number;
-		  changePins;
+		  chipStartPin = 1;	//1-7
 		  
 		  break;
 		//Time Seconds 1s
 		case C:
 		  chipAddr = currentAdr
 		  writeValue = number;
-		  changePins;
+		  chipStartPin = 8;	//8-14
 		  
 		  break;
 		//Home Penalty Top Minutes 1s
 		case N:
 		  chipAddr = currentAdr
 		  writeValue = number;
-		  changePins;
+		  chipStartPin = 1;	//1-7
 		  
 		  break;
 		//Home Penalty Top Seconds 10s
 		case M:
 		  chipAddr = currentAdr
 		  writeValue = number;
-		  changePins;
+		  chipStartPin = 1;	//1-7
 		  
 		  break;
 		//Home Penalty Top Seconds 1s
 		case L:
 		  chipAddr = currentAdr
 		  writeValue = number;
-		  changePins;
+		  chipStartPin = 8;	//8-15
 		  
 		  break;
 		//Home Penalty Bottom Minutes 1s
 		case T:
 		  chipAddr = currentAdr
 		  writeValue = number;
-		  changePins;
+		  chipStartPin = 1;	//1-7
 		  
 		  break;
 		//Home Penalty Bottom Seconds 10s
 		case S:
 		  chipAddr = currentAdr
 		  writeValue = number;
-		  changePins;
+		  chipStartPin = 1;	//1-7
 		  
 		  break;
 		//Home Penalty Bottom Seconds 1s
 		case R:
 		  chipAddr = currentAdr
 		  writeValue = number;
-		  changePins;
+		  chipStartPin = 8;	//8-15
 		  
 		  break;
 		//Away Penalty Top Minutes 1s
 		case K:
 		  chipAddr = currentAdr
 		  writeValue = number;
-		  changePins;
+		  chipStartPin = 1;	//1-7
 		  
 		  break;
 		//Away Penalty Top Seconds 10s
 		case J:
 		  chipAddr = currentAdr
 		  writeValue = number;
-		  changePins;
+		  chipStartPin = 1;	//1-7
 		  
 		  break;
 		//Away Penalty Top Seconds 1s
 		case I:
 		  chipAddr = currentAdr
 		  writeValue = number;
-		  changePins;
+		  chipStartPin = 8;	//8-15
 		  
 		  break;
 		//Away Penalty Bottom Minutes 1s
 		case Q:
 		  chipAddr = currentAdr
 		  writeValue = number;
-		  changePins;
+		  chipStartPin = 1;	//1-7
 		  
 		  break;
 		//Away Penalty Bottom Seconds 10s
 		case P:
 		  chipAddr = currentAdr
 		  writeValue = number;
-		  changePins;
+		  chipStartPin = 1;	//1-7
 		  
 		  break;
 		//Away Penalty Bottom Seconds 1s
 		case O:
 		  chipAddr = currentAdr
 		  writeValue = number;
-		  changePins;
+		  chipStartPin = 8;	//8-14
 		  
 		  break;
 		//Period
 		case U:
 		  chipAddr = currentAdr
 		  writeValue = number;
-		  changePins;
+		  chipStartPin = 1;	//1-7
 		  
 		  break;
 		//Horn
 		case V:
 		  chipAddr = currentAdr
 		  writeValue = number;
-		  changePins;
+		  chipPins;
 		  
 		  break;
 	  }
+	  
       currentaddr = 'Z';
+      update = 1;
     }
 
     currentaddr = inChar;
