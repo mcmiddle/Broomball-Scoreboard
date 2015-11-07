@@ -1,4 +1,4 @@
-//Code written by Jordan Grider to for an Arduino Mega to control 7-segment output for a relay board
+//Code written by Jordan Grider, Michael Middleton, and Tino Moore for an Arduino Mega to control 7-segment output for a relay board
 #include "PCA9685.h"
 
 unsigned char update = 0; 	//flag set when new data received from ref-controller
@@ -17,6 +17,7 @@ boolean serialRX = false;
 
 char currentaddr = 'Z';
 
+//TODO Add 4th decode type to support inversion of 2nd time displays
 
 void setup() {                
 
@@ -491,6 +492,7 @@ void serialEvent1() {
 		  decodeType = 1;
 		  dotPin = 15;
 		  break;
+		//TODO Inversion
 		//Time Seconds 10s
 		case D:
 		  chipAddr = currentAdr
