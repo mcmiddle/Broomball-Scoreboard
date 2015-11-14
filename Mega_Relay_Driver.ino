@@ -8,7 +8,7 @@ char chipStartPin = 0; //Pin corresponding to starting location of the display b
 byte brightness;    //TODO set initial value
 char dotPin = 0;  //Pin corresponding to the dot, -1 if no dot
 char decodeType = -1; //There are two different pin mappings for display depending on single digit or two digits
-					  //value is used for decoding each type. 0 is one digit by itself, 1 is first digit of two, 2 is second digit of two
+					  //value is used for decoding each type. 0 is one digit by itself, 1 is first digit of two, 2 is second digit of two, 3 is 10s inverted, 4 is 1s inverted
 
 int led = 22;
 int inint = 0;
@@ -340,91 +340,115 @@ unsigned char sevenSegDecode(unsigned char number){
 	//TODO
 	//Check with matt about different display mappings (see display.xlsx)
 	unsigned char decoded = 0;  //Consists of 1's and 0's that map to a segment of the display
-	//Pattern for decodeType = 2 is XBACGFED
-	//Pattern for decodeType = 1 is XDCBGAFE
+	//Pattern for decodeType = 2 and 3 is XBACGFED
+	//Pattern for decodeType = 1 and 4 is XDCBGAFE
 	//Pattern for decodeType = 0 is XBAFGCED
 	// X is don't care value for above
 	switch(number)
 	{
-		case 0: //ABCDEF on
+		case 0: //ABCDEF on normal and inverted
 			//01110111
-			if(decodeType == 2) decoded = 0x77;
+			if(decodeType == 2 || decodeType == 3) decoded = 0x77;
 			//01110111
-			else if(decodeType == 1) decoded = 0x77;
+			else if(decodeType == 1 || decodeType == 4) decoded = 0x77;
 			//01110111
 			else if(decodeType == 0) decoded = 0x77;
 			break;
-		case 1: //BC on
+		case 1: //BC on normal, EF on inverted
 			//01010000
 			if(decodeType == 2) decoded = 0x50;
 			//00110000
 			else if(decodeType == 1) decoded = 0x30;
 			//01000100
 			else if(decodeType == 0) decoded = 0x44;
+			//00000110
+			else if(decodeType == 3) decoded = 0x06;
+			//00000011
+			else if(decodeType == 4) decoded = 0x03;
 			break;
-		case 2: //ABDEG on
+		case 2: //ABDEG on normal and inverted
 			//01101011
-			if(decodeType == 2) decoded = 0x6B;
+			if(decodeType == 2 || decodeType == 3) decoded = 0x6B;
 			//01011101
-			else if(decodeType == 1) decoded = 0x5D;
+			else if(decodeType == 1 decodeType == 4) decoded = 0x5D;
 			//01101011
 			else if(decodeType == 0) decoded = 0x6B;
 			break;
-		case 3: //ABCDG on
+		case 3: //ABCDG on normal, ADEFG on inverted
 			//01111001
 			if(decodeType == 2) decoded = 0x79;
 			//01111100
 			else if(decodeType == 1) decoded = 0x7C;
 			//01101101
 			else if(decodeType == 0) decoded = 0x6D;
+			//00101111
+			else if(decodeType == 3) decoded = 0x2F;
+			//01001111
+			else if(decodeType == 4) decoded = 0x4F;
 			break;
-		case 4: //BCFG on
+		case 4: //BCFG on normal, CEFG on inverted
 			//01011100
 			if(decodeType == 2) decoded = 0x5C;
 			//00111010
 			else if(decodeType == 1) decoded = 0x3A;
 			//01011100
 			else if(decodeType == 0) decoded = 0x5C;
+			//00011110
+			else if(decodeType == 3) decoded = 0x1E;
+			//00101011
+			else if(decodeType == 4) decoded = 0x2B;
 			break;
-		case 5: //ACDFG on
+		case 5: //ACDFG on normal and inverted
 			//00111101
-			if(decodeType == 2) decoded = 0x3D;
+			if(decodeType == 2 || decodeType == 3) decoded = 0x3D;
 			//01101110
-			else if(decodeType == 1) decoded = 0x6E;
+			else if(decodeType == 1 decodeType == 4) decoded = 0x6E;
 			//00111101
 			else if(decodeType == 0) decoded = 0x3D;
 			break;
-		case 6: //ACDEFG on
+		case 6: //ACDEFG on normal, ABCDFG on inverted
 			//00111111
 			if(decodeType == 2) decoded = 0x3F;
 			//01101111
 			else if(decodeType == 1) decoded = 0x6F;
 			//00111111
 			else if(decodeType == 0) decoded = 0x3F;
+			//01111101
+			else if(decodeType == 3) decoded = 0x7D;
+			//01111110
+			else if(decodeType == 4) decoded = 0x7E;
 			break;
-		case 7: //ABC on
+		case 7: //ABC on normal, DEF on inverted
 			//01110000
 			if(decodeType == 2) decoded = 0x70;
 			//00110100
 			else if(decodeType == 1) decoded = 0x34;
 			//01100100
 			else if(decodeType == 0) decoded = 0x64;
+			//00000111
+			else if(decodeType == 3) decoded = 0x07;
+			//01000011
+			else if(decodeType == 4) decoded = 0x43;
 			break;
-		case 8: //ABCDEFG on
+		case 8: //ABCDEFG on normal and inverted
 			//01111111
-			if(decodeType == 2) decoded = 0x7F;
+			if(decodeType == 2 || decodeType == 3) decoded = 0x7F;
 			//01111111
-			else if(decodeType == 1) decoded = 0x7F;
+			else if(decodeType == 1 || decodeType == 4) decoded = 0x7F;
 			//01111111
 			else if(decodeType == 0) decoded = 0x7F;
 			break;
-		case 9: //ABCDFG on
+		case 9: //ABCDFG on normal, ACDEFG on inverted
 			//01111101
 			if(decodeType == 2) decoded = 0x7D;
 			//01111110
 			else if(decodeType == 1) decoded = 0x7E;
 			//01111101
 			else if(decodeType == 0) decoded = 0x7D;
+			//00111111
+			else if(decodeType == 3) decoded = 0x3F;
+			//01101111
+			else if(decodeType == 4) decoded = 0x6F;
 			break;
 	}
 	return 0;
@@ -493,20 +517,20 @@ void serialEvent1() {
 		  dotPin = 15;
 		  break;
 		//TODO Inversion
-		//Time Seconds 10s
+		//Time Seconds 1s
 		case D:
 		  chipAddr = currentAdr
 		  writeValue = number;
 		  chipStartPin = 1;	//1-7
-		  decodeType = 2;
+		  decodeType = 4;
 		  dotPin = -1;
 		  break;
-		//Time Seconds 1s
+		//Time Seconds 10s
 		case C:
 		  chipAddr = currentAdr
 		  writeValue = number;
 		  chipStartPin = 8;	//8-14
-		  decodeType = 1;
+		  decodeType = 3;
 		  dotPin = 15;
 		  break;
 		//Home Penalty Top Minutes 1s
