@@ -1,11 +1,13 @@
 //Code written by Jordan Grider, Michael Middleton, and Tino Moore for an Arduino Mega to control 7-segment output for a relay board
 #include "PCA9685.h"
+#include <Wire.h>
+#include <Adafruit_PWMServoDriver.h>
 
 unsigned char update = 0; 	//flag set when new data received from ref-controller
 unsigned char chipAddr = 0; //Address of chip to update
 unsigned char writeValue = 0; //Value to be displayed
 char chipStartPin = 0; //Pin corresponding to starting location of the display being updated at the given chip address
-byte brightness;    //TODO set initial value
+byte brightness= 100;    //TODO set initial value
 char dotPin = 0;  //Pin corresponding to the dot, -1 if no dot
 char decodeType = -1; //There are two different pin mappings for display depending on single digit or two digits
 					  //value is used for decoding each type. 0 is one digit by itself, 1 is first digit of two, 2 is second digit of two, 3 is 10s inverted, 4 is 1s inverted
@@ -15,34 +17,33 @@ int inint = 0;
 char incoming = 'a';
 boolean serialRX = false;
 
-char currentaddr = 'Z';
+char currentAddr = 'Z';
+PCA9685 pwmHomeScore;
+PCA9685 pwmVisitorScore;
+//PCA9685 pwmPeriod;
+PCA9685 pwmTimeMinutes;
+PCA9685 pwmTimeSeconds;
+PCA9685 pwmHomePenaltyTopMinutes;
+PCA9685 pwmHomePenaltyTopSeconds;
+PCA9685 pwmHomePenaltyBottomMinutes;
+PCA9685 pwmHomePenaltyBottomSeconds;
+PCA9685 pwmAwayPenaltyTopMinutes;
+PCA9685 pwmAwayPenaltyTopSeconds;
+PCA9685 pwmAwayPenaltyBottomMinutes;
+PCA9685 pwmAwayPenaltyBottomSeconds;
 
-//TODO Add 4th decode type to support inversion of 2nd time displays
+Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x4F);
 
 void setup() {                
 
   Wire.begin();
-  Serial1.begin(9600);
+  //Serial1.begin(9600);
   Serial.begin(9600);  // For debugging to terminal
-  
-  PCA9685 pwmHomeScore;
-  PCA9685 pwmVisitorScore;
-  PCA9685 pwmPeriod;
-  PCA9685 pwmTimeMintues;
-  PCA9685 pwmTimeSeconds;
-  PCA9685 pwmHomePenaltyTopMinutes;
-  PCA9685 pwmHomePenaltyTopSeconds;
-  PCA9685 pwmHomePenaltyBottomMinutes;
-  PCA9685 pwmHomePenaltyBottomSeconds;
-  PCA9685 pwmAwayPenaltyTopMinutes;
-  PCA9685 pwmAwayPenaltyTopSeconds;
-  PCA9685 pwmAwayPenaltyBottomMinutes;
-  PCA9685 pwmAwayPenaltyBottomSeconds;
   
   pwmHomeScore.begin(10001010);
   pwmVisitorScore.begin(10001000);
-  pwmPeriod.begin(10011110);
-  pwmTimeMintues.begin(10100000);
+  //pwmPeriod.begin(1001111);
+  pwmTimeMinutes.begin(10100000);
   pwmTimeSeconds.begin(10100010);
   pwmHomePenaltyTopMinutes.begin(10010110);
   pwmHomePenaltyTopSeconds.begin(10011000);
@@ -55,8 +56,8 @@ void setup() {
   
   pwmHomeScore.init();
   pwmVisitorScore.init();
-  pwmPeriod.init();
-  pwmTimeMintues.init();
+  //pwmPeriod.init();
+  pwmTimeMinutes.init();
   pwmTimeSeconds.init();
   pwmHomePenaltyTopMinutes.init();
   pwmHomePenaltyTopSeconds.init();
@@ -66,21 +67,32 @@ void setup() {
   pwmAwayPenaltyTopSeconds.init();
   pwmAwayPenaltyBottomMinutes.init();
   pwmAwayPenaltyBottomSeconds.init();
+  
+  pwm.begin();
+  
+  pwm.setPWMFreq(100);  // update speed set to 100 Hz
 }
 
 
 void loop() {
     unsigned char decodedValue = 0;
     int i, j;
-	
+/*	
   if (serialRX && Debugger){
 	Serial.println(chipAddr);
     Serial.println(writeValue);
 	Serial.println(chipPins);
     serialRX = false;
   }  
-  
+  */
   //TODO handle brightness logic
+  chipAddr = 'U';
+  chipStartPin = 1;	//1-7
+  decodeType = 0;
+  update = 1;
+  dotPin = -1;
+  if (writeValue == 9) writeValue = 0;
+  else writeValue++;
   
   //Display update logic
   if (update == 1){
@@ -89,13 +101,13 @@ void loop() {
   	
   	//Decode the display value
   	decodedValue = sevenSegDecode(writeValue);
-  	
+  	Serial.println(decodedValue);
   	//Write the value to the display
-  	for (i = chipStartPin; i < chipStartPin + 7; i ++){
-  	    j = 0;
+        j = 0;
+  	for (i = chipStartPin; i < chipStartPin + 7; i ++){  
   	    //case statement to determine which pwm object to apply changes to based on chipAddr
   	    switch(chipAddr){
-  	        case H :
+  	        case 'H' :
   	            if(((decodedValue >> j) & 0x01) == 0){   
       	            pwmHomeScore.setLEDOff(i);
   	            } else {
@@ -106,7 +118,7 @@ void loop() {
 					pwmHomeScore.setLEDDimmed(dotPin, brightness);
 				}
   	            break;
-  	        case G :
+  	        case 'G' :
   	            if(((decodedValue >> j) & 0x01) == 0){   
       	            pwmHomeScore.setLEDOff(i);
   	            } else {
@@ -117,7 +129,7 @@ void loop() {
 					pwmHomeScore.setLEDDimmed(dotPin, brightness);
 				}
   	            break;
-  	        case B :
+  	        case 'B' :
   	            if(((decodedValue >> j) & 0x01) == 0){   
       	            pwmVisitorScore.setLEDOff(i);
   	            } else {
@@ -128,7 +140,7 @@ void loop() {
 					pwmVisitorScore.setLEDDimmed(dotPin, brightness);
 				}
   	            break;
-  	        case A :
+  	        case 'A' :
   	            if(((decodedValue >> j) & 0x01) == 0){   
       	            pwmVisitorScore.setLEDOff(i);
   	            } else {
@@ -139,7 +151,7 @@ void loop() {
 					pwmVisitorScore.setLEDDimmed(dotPin, brightness);
 				}
   	            break;
-  	        case F :
+  	        case 'F' :
   	            if(((decodedValue >> j) & 0x01) == 0){   
       	            pwmTimeMinutes.setLEDOff(i);
   	            } else {
@@ -150,7 +162,7 @@ void loop() {
 					pwmTimeMinutes.setLEDDimmed(dotPin, brightness);
 				}
   	            break;
-  	        case E :
+  	        case 'E' :
   	            if(((decodedValue >> j) & 0x01) == 0){   
       	            pwmTimeMinutes.setLEDOff(i);
   	            } else {
@@ -161,7 +173,7 @@ void loop() {
 					pwmTimeMinutes.setLEDDimmed(dotPin, brightness);
 				}
   	            break;
-  	        case D :
+  	        case 'D' :
   	            if(((decodedValue >> j) & 0x01) == 0){   
       	            pwmTimeSeconds.setLEDOff(i);
   	            } else {
@@ -172,7 +184,7 @@ void loop() {
 					pwmTimeSeconds.setLEDDimmed(dotPin, brightness);
 				}
   	            break;
-  	        case C :
+  	        case 'C' :
   	            if(((decodedValue >> j) & 0x01) == 0){   
       	            pwmTimeSeconds.setLEDOff(i);
   	            } else {
@@ -183,7 +195,7 @@ void loop() {
 					pwmTimeSeconds.setLEDDimmed(dotPin, brightness);
 				}
   	            break;
-  	        case N :
+  	        case 'N' :
   	            if(((decodedValue >> j) & 0x01) == 0){   
       	            pwmHomePenaltyTopMinutes.setLEDOff(i);
   	            } else {
@@ -194,7 +206,7 @@ void loop() {
 					pwmHomePenaltyTopMinutes.setLEDDimmed(dotPin, brightness);
 				}
   	            break;
-  	        case M :
+  	        case 'M' :
   	            if(((decodedValue >> j) & 0x01) == 0){   
       	            pwmHomePenaltyTopSeconds.setLEDOff(i);
   	            } else {
@@ -205,7 +217,7 @@ void loop() {
 					pwmHomePenaltyTopSeconds.setLEDDimmed(dotPin, brightness);
 				}
   	            break;
-  	        case L :
+  	        case 'L' :
   	            if(((decodedValue >> j) & 0x01) == 0){   
       	            pwmHomePenaltyTopSeconds.setLEDOff(i);
   	            } else {
@@ -216,7 +228,7 @@ void loop() {
 					pwmHomePenaltyTopSeconds.setLEDDimmed(dotPin, brightness);
 				}
   	            break;
-  	        case T :
+  	        case 'T' :
   	            if(((decodedValue >> j) & 0x01) == 0){   
       	            pwmHomePenaltyBottomMinutes.setLEDOff(i);
   	            } else {
@@ -227,7 +239,7 @@ void loop() {
 					pwmHomePenaltyBottomMinutes.setLEDDimmed(dotPin, brightness);
 				}
   	            break;
-  	        case S :
+  	        case 'S' :
   	            if(((decodedValue >> j) & 0x01) == 0){   
       	            pwmHomePenaltyBottomSeconds.setLEDOff(i);
   	            } else {
@@ -238,7 +250,7 @@ void loop() {
 					pwmHomePenaltyBottomSeconds.setLEDDimmed(dotPin, brightness);
 				}
   	            break;
-  	        case R :
+  	        case 'R' :
   	            if(((decodedValue >> j) & 0x01) == 0){   
       	            pwmHomePenaltyBottomSeconds.setLEDOff(i);
   	            } else {
@@ -249,7 +261,7 @@ void loop() {
 					pwmHomePenaltyBottomSeconds.setLEDDimmed(dotPin, brightness);
 				}
   	            break;
-  	        case K :
+  	        case 'K' :
   	            if(((decodedValue >> j) & 0x01) == 0){   
       	            pwmAwayPenaltyTopMinutes.setLEDOff(i);
   	            } else {
@@ -260,7 +272,7 @@ void loop() {
 					pwmAwayPenaltyTopMinutes.setLEDDimmed(dotPin, brightness);
 				}
   	            break;
-  	        case J :
+  	        case 'J' :
   	            if(((decodedValue >> j) & 0x01) == 0){   
       	            pwmAwayPenaltyTopSeconds.setLEDOff(i);
   	            } else {
@@ -271,7 +283,7 @@ void loop() {
 					pwmAwayPenaltyTopSeconds.setLEDDimmed(dotPin, brightness);
 				}
   	            break;
-  	        case I :
+  	        case 'I' :
   	            if(((decodedValue >> j) & 0x01) == 0){   
       	            pwmAwayPenaltyTopSeconds.setLEDOff(i);
   	            } else {
@@ -282,7 +294,7 @@ void loop() {
 					pwmAwayPenaltyTopSeconds.setLEDDimmed(dotPin, brightness);
 				}
   	            break;
-  	        case Q :
+  	        case 'Q' :
   	            if(((decodedValue >> j) & 0x01) == 0){   
       	            pwmAwayPenaltyBottomMinutes.setLEDOff(i);
   	            } else {
@@ -293,7 +305,7 @@ void loop() {
 					pwmAwayPenaltyBottomMinutes.setLEDDimmed(dotPin, brightness);
 				}
   	            break;
-  	        case P :
+  	        case 'P' :
   	            if(((decodedValue >> j) & 0x01) == 0){   
       	            pwmAwayPenaltyBottomSeconds.setLEDOff(i);
   	            } else {
@@ -304,7 +316,7 @@ void loop() {
 					pwmAwayPenaltyBottomSeconds.setLEDDimmed(dotPin, brightness);
 				}
   	            break;
-  	        case O :
+  	        case 'O' :
   	            if(((decodedValue >> j) & 0x01) == 0){   
       	            pwmAwayPenaltyBottomSeconds.setLEDOff(i);
   	            } else {
@@ -315,24 +327,30 @@ void loop() {
 					pwmAwayPenaltyBottomSeconds.setLEDDimmed(dotPin, brightness);
 				}
   	            break;
-  	        case U :
+  	        case 'U' :
+                    Serial.println(i);
   	            if(((decodedValue >> j) & 0x01) == 0){   
-      	            pwmPeriod.setLEDOff(i);
-  	            } else {
-  	                pwmPeriod.setLEDDimmed(i, brightness);
+                      Serial.println("Writing Off");
+      	             // pwmPeriod.setLEDOff(i);
+                        pwm.setPin(i, 0, 0);
+  	            } 
+                    else {
+                        Serial.println("Writing On");
+  	                //pwmPeriod.setLEDDimmed(i, brightness);
+                        pwm.setPin(i, brightness, 0);
   	            }
 				if(j == 7)
 				{
-					pwmPeriod.setLEDDimmed(dotPin, brightness);
+					//pwmPeriod.setLEDDimmed(dotPin, brightness);
 				}
   	            break;
   	    }   //end case
   	    j ++;
   	} // end for
   	  	
-  	update = 0;	//clear the flag, wait for next update
+  	//update = 0;	//clear the flag, wait for next update
   } //end update block
-
+  delay(1000);
   
 }   //end loop
 
@@ -370,7 +388,7 @@ unsigned char sevenSegDecode(unsigned char number){
 			//01101011
 			if(decodeType == 2 || decodeType == 3) decoded = 0x6B;
 			//01011101
-			else if(decodeType == 1 decodeType == 4) decoded = 0x5D;
+			else if(decodeType == 1 || decodeType == 4) decoded = 0x5D;
 			//01101011
 			else if(decodeType == 0) decoded = 0x6B;
 			break;
@@ -402,7 +420,7 @@ unsigned char sevenSegDecode(unsigned char number){
 			//00111101
 			if(decodeType == 2 || decodeType == 3) decoded = 0x3D;
 			//01101110
-			else if(decodeType == 1 decodeType == 4) decoded = 0x6E;
+			else if(decodeType == 1 || decodeType == 4) decoded = 0x6E;
 			//00111101
 			else if(decodeType == 0) decoded = 0x3D;
 			break;
@@ -451,13 +469,14 @@ unsigned char sevenSegDecode(unsigned char number){
 			else if(decodeType == 4) decoded = 0x6F;
 			break;
 	}
-	return 0;
+	return decoded;
 }
 
 
 void serialEvent1() {
-  while (Serial1.available()) {
-    char inChar = (char)Serial1.read();
+  //TODO Change back to Serial1
+  while (Serial.available()) {
+    char inChar = (char)Serial.read();
     //Serial1.print(inChar);
 
     int number = inChar - '0';
@@ -467,50 +486,50 @@ void serialEvent1() {
 
 	// If a number, display. Else set it as address.
     if (number < 10 && number >= -1){
-	  switch(currentaddr){
+	  switch(currentAddr){
 		//Home Score 10s
-	    case H:
-		  chipAddr = currentAdr
+	    case 'H':
+		  chipAddr = currentAddr;
 		  writeValue = number;
 		  chipStartPin = 1;	//1-7
 		  decodeType = 2;
 		  dotPin = -1;
 		  break;
 		//Home Score 1s
-		case G:
-		  chipAddr = currentAdr
+		case 'G':
+		  chipAddr = currentAddr;
 		  writeValue = number;
 		  chipStartPin = 8;	//8-14
 		  decodeType = 1;
 		  dotPin = -1;
 		  break;
 		//Away Score 10s
-		case B:
-		  chipAddr = currentAdr
+		case 'B':
+		  chipAddr = currentAddr;
 		  writeValue = number;
 		  chipStartPin = 1;	//1-7
 		  decodeType = 2;
 		  dotPin = -1;
 		  break;
 		//Away Score 1s
-		case A:
-		  chipAddr = currentAdr
+		case 'A':
+		  chipAddr = currentAddr;
 		  writeValue = number;
 		  chipStartPin = 8;	//8-14
 		  decodeType = 1;
 		  dotPin = -1;
 		  break;
 		//Time Minutes 10s
-		case F:
-		  chipAddr = currentAdr
+		case 'F':
+		  chipAddr = currentAddr;
 		  writeValue = number;
 		  chipStartPin = 1;	//1-7
 		  decodeType = 2;
 		  dotPin = -1;
 		  break;
 		//Time Minutes 1s
-		case E:
-		  chipAddr = currentAdr
+		case 'E':
+		  chipAddr = currentAddr;
 		  writeValue = number;
 		  chipStartPin = 8;	//8-14
 		  decodeType = 1;
@@ -518,139 +537,139 @@ void serialEvent1() {
 		  break;
 		//TODO Inversion
 		//Time Seconds 1s
-		case D:
-		  chipAddr = currentAdr
+		case 'D':
+		  chipAddr = currentAddr;
 		  writeValue = number;
 		  chipStartPin = 1;	//1-7
 		  decodeType = 4;
 		  dotPin = -1;
 		  break;
 		//Time Seconds 10s
-		case C:
-		  chipAddr = currentAdr
+		case 'C':
+		  chipAddr = currentAddr;
 		  writeValue = number;
 		  chipStartPin = 8;	//8-14
 		  decodeType = 3;
 		  dotPin = 15;
 		  break;
 		//Home Penalty Top Minutes 1s
-		case N:
-		  chipAddr = currentAdr
+		case 'N':
+		  chipAddr = currentAddr;
 		  writeValue = number;
 		  chipStartPin = 1;	//1-7
 		  decodeType = 0;
 		  dotPin = 8;
 		  break;
 		//Home Penalty Top Seconds 10s
-		case M:
-		  chipAddr = currentAdr
+		case 'M':
+		  chipAddr = currentAddr;
 		  writeValue = number;
 		  chipStartPin = 1;	//1-7
 		  decodeType = 2;
 		  dotPin = -1;
 		  break;
 		//Home Penalty Top Seconds 1s
-		case L:
-		  chipAddr = currentAdr
+		case 'L':
+		  chipAddr = currentAddr;
 		  writeValue = number;
 		  chipStartPin = 8;	//8-15
 		  decodeType = 1;
 		  dotPin = 15;
 		  break;
 		//Home Penalty Bottom Minutes 1s
-		case T:
-		  chipAddr = currentAdr
+		case 'T':
+		  chipAddr = currentAddr;
 		  writeValue = number;
 		  chipStartPin = 1;	//1-7
 		  decodeType = 0;
 		  dotPin = 8;
 		  break;
 		//Home Penalty Bottom Seconds 10s
-		case S:
-		  chipAddr = currentAdr
+		case 'S':
+		  chipAddr = currentAddr;
 		  writeValue = number;
 		  chipStartPin = 1;	//1-7
 		  decodeType = 2;
 		  dotPin = -1;
 		  break;
 		//Home Penalty Bottom Seconds 1s
-		case R:
-		  chipAddr = currentAdr
+		case 'R':
+		  chipAddr = currentAddr;
 		  writeValue = number;
 		  chipStartPin = 8;	//8-15
 		  decodeType = 1;
 		  dotPin = 15;
 		  break;
 		//Away Penalty Top Minutes 1s
-		case K:
-		  chipAddr = currentAdr
+		case 'K':
+		  chipAddr = currentAddr;
 		  writeValue = number;
 		  chipStartPin = 1;	//1-7
 		  decodeType = 0;
 		  dotPin = 8;
 		  break;
 		//Away Penalty Top Seconds 10s
-		case J:
-		  chipAddr = currentAdr
+		case 'J':
+		  chipAddr = currentAddr;
 		  writeValue = number;
 		  chipStartPin = 1;	//1-7
 		  decodeType = 2;
 		  dotPin = -1;
 		  break;
 		//Away Penalty Top Seconds 1s
-		case I:
-		  chipAddr = currentAdr
+		case 'I':
+		  chipAddr = currentAddr;
 		  writeValue = number;
 		  chipStartPin = 8;	//8-15
 		  decodeType = 1;
 		  dotPin = 15;
 		  break;
 		//Away Penalty Bottom Minutes 1s
-		case Q:
-		  chipAddr = currentAdr
+		case 'Q':
+		  chipAddr = currentAddr;
 		  writeValue = number;
 		  chipStartPin = 1;	//1-7
 		  decodeType = 0;
 		  dotPin = 8;
 		  break;
 		//Away Penalty Bottom Seconds 10s
-		case P:
-		  chipAddr = currentAdr
+		case 'P':
+		  chipAddr = currentAddr;
 		  writeValue = number;
 		  chipStartPin = 1;	//1-7
 		  decodeType = 2;
 		  dotPin = -1;
 		  break;
 		//Away Penalty Bottom Seconds 1s
-		case O:
-		  chipAddr = currentAdr
+		case 'O':
+		  chipAddr = currentAddr;
 		  writeValue = number;
 		  chipStartPin = 8;	//8-14
 		  decodeType = 1;
 		  dotPin = 15;
 		  break;
 		//Period
-		case U:
-		  chipAddr = currentAdr
+		case 'U':
+		  chipAddr = currentAddr;
 		  writeValue = number;
 		  chipStartPin = 1;	//1-7
 		  decodeType = 0;
 		  dotPin = -1;
 		  break;
 		//Horn
-		case V:
-		  chipAddr = currentAdr
+		case 'V':
+		  chipAddr = currentAddr;
 		  writeValue = number;
-		  chipPins;
+		  //chipPins;
 		  
 		  break;
 	  }
 	  
-      currentaddr = 'Z';
+      currentAddr = 'Z';
       update = 1;
     }
 
-    currentaddr = inChar;
+    currentAddr = inChar;
 
   }
   serialRX = true;
