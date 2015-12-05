@@ -1,0 +1,109 @@
+update = 1;
+//                //Home Score 10s
+//	          chipAddr = 'H';
+//		  chipStartPin = 1;	//1-7
+//		  decodeType = 2;
+//		  dotPin = -1;
+//		  //Home Score 1s
+//		  chipAddr = 'G';
+//		  chipStartPin = 8;	//8-14
+//		  decodeType = 1;
+//		  dotPin = -1;
+//		  //Away Score 10s
+//		  chipAddr = 'B';
+//		  chipStartPin = 1;	//1-7
+//		  decodeType = 2;
+//		  dotPin = -1;
+//		  //Away Score 1s
+//		  chipAddr = 'A';
+//		  chipStartPin = 8;	//8-14
+//		  decodeType = 1;
+//		  dotPin = -1;
+//		  //Time Minutes 10s
+//		  chipAddr = 'F';
+//		  chipStartPin = 1;	//1-7
+//		  decodeType = 2;
+//		  dotPin = -1;
+//		  //Time Minutes 1s
+//		  chipAddr = 'E';
+//		  chipStartPin = 8;	//8-14
+//		  decodeType = 1;
+//		  dotPin = 15;
+//		  //Time Seconds 1s
+//		  chipAddr = 'D';
+//		  chipStartPin = 1;	//1-7
+//		  decodeType = 3;
+//		  dotPin = -1;
+//		  //Time Seconds 10s
+//		  chipAddr = 'C';
+//		  chipStartPin = 8;	//8-14
+//		  decodeType = 4;
+//		  dotPin = 15;
+//		  //Home Penalty Top Minutes 1s
+//		  chipAddr = 'N';
+//		  chipStartPin = 1;	//1-7
+//		  decodeType = 0;
+//		  dotPin = 8;
+//		  //Home Penalty Top Seconds 10s
+//		  chipAddr = 'M';
+//		  chipStartPin = 1;	//1-7
+//		  decodeType = 2;
+//		  dotPin = -1;
+//		  //Home Penalty Top Seconds 1s
+//		  chipAddr = 'L';
+//		  chipStartPin = 8;	//8-15
+//		  decodeType = 5;
+//		  dotPin = -1;
+//		  //Home Penalty Bottom Minutes 1s
+//		  chipAddr = 'T';
+//		  chipStartPin = 1;	//1-7
+//		  decodeType = 0;
+//		  dotPin = 8;
+//		  //Home Penalty Bottom Seconds 10s
+//		  chipAddr = 'S';
+//		  chipStartPin = 1;	//1-7
+//		  decodeType = 2;
+//		  dotPin = -1;
+//		  //Home Penalty Bottom Seconds 1s
+//		  chipAddr = 'R';
+//		  chipStartPin = 8;	//8-15
+//		  decodeType = 5;
+//		  dotPin = -1;
+//		  //Away Penalty Top Minutes 1s
+//		  chipAddr = 'K';
+//		  chipStartPin = 1;	//1-7
+//		  decodeType = 0;
+//		  dotPin = 8;
+//		  //Away Penalty Top Seconds 10s
+//		  chipAddr = 'J';
+//		  chipStartPin = 1;	//1-7
+//		  decodeType = 2;
+//		  dotPin = -1;
+//		  //Away Penalty Top Seconds 1s
+//		  chipAddr = 'I';
+//		  chipStartPin = 8;	//8-15
+//		  decodeType = 5;
+//		  dotPin = -1;
+//		  //Away Penalty Bottom Minutes 1s
+//		  chipAddr = 'Q';
+//		  chipStartPin = 1;	//1-7
+//		  decodeType = 0;
+//		  dotPin = 8;
+//		  //Away Penalty Bottom Seconds 10s
+//		  chipAddr = 'P';
+//		  chipStartPin = 1;	//1-7
+//		  decodeType = 2;
+//		  dotPin = -1;
+//		  //Away Penalty Bottom Seconds 1s
+//		  chipAddr = 'O';
+//		  chipStartPin = 8;	//8-14
+//		  decodeType = 5;
+//		  dotPin = -1;
+//		  //Period
+//		  chipAddr = 'U';
+//		  chipStartPin = 1;	//1-7
+//		  decodeType = 6;
+//		  dotPin = -1;
+  
+  // if (writeValue == 9) writeValue = 0;
+  // else writeValue++;

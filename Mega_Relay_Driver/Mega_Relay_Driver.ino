@@ -6,15 +6,14 @@ unsigned char update = 0; 	//flag set when new data received from ref-controller
 unsigned char chipAddr = 0; //Address of chip to update
 unsigned char writeValue = 0; //Value to be displayed
 char chipStartPin = 0; //Pin corresponding to starting location of the display being updated at the given chip address
-byte brightness= 100;    //TODO set initial value
+int brightness = 0; 
+char newBrightness = 0;
 char dotPin = 0;  //Pin corresponding to the dot, -1 if no dot
 char decodeType = -1; //There are two different pin mappings for display depending on single digit or two digits
 					  //value is used for decoding each type. 0 is one digit by itself, 1 is first digit of two, 2 is second digit of two, 3 is 10s inverted, 4 is 1s inverted
-
-int led = 22;
-int inint = 0;
-char incoming = 'a';
 boolean serialRX = false;
+boolean mainController = false; //For use when detecting brightness
+int currValues [22]; // Array of most recent value for each display for use in brightness logic
 
 char currentAddr = 'Z';
 Adafruit_PWMServoDriver pwmHomeScore = Adafruit_PWMServoDriver(0x45);
@@ -37,6 +36,14 @@ void setup() {
   Wire.begin();
   //Serial1.begin(9600);
   Serial.begin(9600);  // For debugging to terminal
+  
+  int sensorValue = analogRead(A0);
+  brightness = sensorValue * 4;
+  
+  for(int i = 0; i < currValues.length(); i++)
+  {
+	currValues[i] = 0;
+  }
   
   pwmHomeScore.begin();
   pwmVisitorScore.begin();
@@ -81,116 +88,22 @@ void loop() {
   }  
   */
   //TODO handle brightness logic 
-//Away Penalty Bottom Minutes 1s
-update = 1;
-//                //Home Score 10s
-//	          chipAddr = 'H';
-//		  chipStartPin = 1;	//1-7
-//		  decodeType = 2;
-//		  dotPin = -1;
-//		  //Home Score 1s
-//		  chipAddr = 'G';
-//		  chipStartPin = 8;	//8-14
-//		  decodeType = 1;
-//		  dotPin = -1;
-//		  //Away Score 10s
-//		  chipAddr = 'B';
-//		  chipStartPin = 1;	//1-7
-//		  decodeType = 2;
-//		  dotPin = -1;
-//		  //Away Score 1s
-//		  chipAddr = 'A';
-//		  chipStartPin = 8;	//8-14
-//		  decodeType = 1;
-//		  dotPin = -1;
-//		  //Time Minutes 10s
-//		  chipAddr = 'F';
-//		  chipStartPin = 1;	//1-7
-//		  decodeType = 2;
-//		  dotPin = -1;
-//		  //Time Minutes 1s
-//		  chipAddr = 'E';
-//		  chipStartPin = 8;	//8-14
-//		  decodeType = 1;
-//		  dotPin = 15;
-//		  //Time Seconds 1s
-//		  chipAddr = 'D';
-//		  chipStartPin = 1;	//1-7
-//		  decodeType = 3;
-//		  dotPin = -1;
-//		  //Time Seconds 10s
-//		  chipAddr = 'C';
-//		  chipStartPin = 8;	//8-14
-//		  decodeType = 4;
-//		  dotPin = 15;
-//		  //Home Penalty Top Minutes 1s
-//		  chipAddr = 'N';
-//		  chipStartPin = 1;	//1-7
-//		  decodeType = 0;
-//		  dotPin = 8;
-//		  //Home Penalty Top Seconds 10s
-//		  chipAddr = 'M';
-//		  chipStartPin = 1;	//1-7
-//		  decodeType = 2;
-//		  dotPin = -1;
-//		  //Home Penalty Top Seconds 1s
-//		  chipAddr = 'L';
-//		  chipStartPin = 8;	//8-15
-//		  decodeType = 5;
-//		  dotPin = -1;
-//		  //Home Penalty Bottom Minutes 1s
-//		  chipAddr = 'T';
-//		  chipStartPin = 1;	//1-7
-//		  decodeType = 0;
-//		  dotPin = 8;
-//		  //Home Penalty Bottom Seconds 10s
-//		  chipAddr = 'S';
-//		  chipStartPin = 1;	//1-7
-//		  decodeType = 2;
-//		  dotPin = -1;
-//		  //Home Penalty Bottom Seconds 1s
-//		  chipAddr = 'R';
-//		  chipStartPin = 8;	//8-15
-//		  decodeType = 5;
-//		  dotPin = -1;
-//		  //Away Penalty Top Minutes 1s
-//		  chipAddr = 'K';
-//		  chipStartPin = 1;	//1-7
-//		  decodeType = 0;
-//		  dotPin = 8;
-//		  //Away Penalty Top Seconds 10s
-//		  chipAddr = 'J';
-//		  chipStartPin = 1;	//1-7
-//		  decodeType = 2;
-//		  dotPin = -1;
-//		  //Away Penalty Top Seconds 1s
-//		  chipAddr = 'I';
-//		  chipStartPin = 8;	//8-15
-//		  decodeType = 5;
-//		  dotPin = -1;
-//		  //Away Penalty Bottom Minutes 1s
-//		  chipAddr = 'Q';
-//		  chipStartPin = 1;	//1-7
-//		  decodeType = 0;
-//		  dotPin = 8;
-//		  //Away Penalty Bottom Seconds 10s
-//		  chipAddr = 'P';
-//		  chipStartPin = 1;	//1-7
-//		  decodeType = 2;
-//		  dotPin = -1;
-//		  //Away Penalty Bottom Seconds 1s
-//		  chipAddr = 'O';
-//		  chipStartPin = 8;	//8-14
-//		  decodeType = 5;
-//		  dotPin = -1;
-//		  //Period
-//		  chipAddr = 'U';
-//		  chipStartPin = 1;	//1-7
-//		  decodeType = 6;
-//		  dotPin = -1;
+  if(mainController)
+  {
+	int sensorValue = analogRead(A0);
+	newBrightness = sensorValue / 4; //Reduce to size of char for serial transport
+	Serial.print('Y');
+	Serial.write(newBrightness); //Use write instead of print to send raw data
+  }
+  else
+  {
+	int tempBrightness = newBrightness * 4;
+	if(((tempBrightness - newBrightness) > 500) || ((newBrightness - tempBrightness) > 500))
+	{
+		updateBrightness(tempBrightness);
+	}
+  }
   
-  if (writeValue == 9) writeValue = 0;
-  else writeValue++;
   
   //Display update logic
   if (update == 1){
@@ -201,11 +114,12 @@ update = 1;
   	decodedValue = sevenSegDecode(writeValue);
   	Serial.println(decodedValue);
   	//Write the value to the display
-        j = 0;
+    j = 0;
   	for (i = chipStartPin; i < chipStartPin + 7; i ++){  
   	    //case statement to determine which pwm object to apply changes to based on chipAddr
   	    switch(chipAddr){
   	        case 'H' :
+				currValues[0] = decodedValue;
   	            if(((decodedValue >> j) & 0x01) == 0){   
       	            pwmHomeScore.setPin(i, 0, 0);
   	            } else {
@@ -217,6 +131,7 @@ update = 1;
 				}
   	            break;
   	        case 'G' :
+				currValues[1] = decodedValue;
   	            if(((decodedValue >> j) & 0x01) == 0){   
       	            pwmHomeScore.setPin(i, 0, 0);
   	            } else {
@@ -228,6 +143,7 @@ update = 1;
 				}
   	            break;
   	        case 'B' :
+				currValues[2] = decodedValue;
   	            if(((decodedValue >> j) & 0x01) == 0){   
       	            pwmVisitorScore.setPin(i, 0, 0);
   	            } else {
@@ -239,6 +155,7 @@ update = 1;
 				}
   	            break;
   	        case 'A' :
+				currValues[3] = decodedValue;
   	            if(((decodedValue >> j) & 0x01) == 0){   
       	            pwmVisitorScore.setPin(i, 0, 0);
   	            } else {
@@ -250,6 +167,7 @@ update = 1;
 				}
   	            break;
   	        case 'F' :
+				currValues[4] = decodedValue;
   	            if(((decodedValue >> j) & 0x01) == 0){   
       	            pwmTimeMinutes.setPin(i, 0, 0);
   	            } else {
@@ -261,6 +179,7 @@ update = 1;
 				}
   	            break;
   	        case 'E' :
+				currValues[5] = decodedValue;
   	            if(((decodedValue >> j) & 0x01) == 0){   
       	            pwmTimeMinutes.setPin(i, 0, 0);
   	            } else {
@@ -272,6 +191,7 @@ update = 1;
 				}
   	            break;
   	        case 'D' :
+				currValues[6] = decodedValue;
   	            if(((decodedValue >> j) & 0x01) == 0){   
       	            pwmTimeSeconds.setPin(i, 0, 0);
   	            } else {
@@ -283,6 +203,7 @@ update = 1;
 				}
   	            break;
   	        case 'C' :
+				currValues[7] = decodedValue;
   	            if(((decodedValue >> j) & 0x01) == 0){   
       	            pwmTimeSeconds.setPin(i, 0, 0);
   	            } else {
@@ -294,6 +215,7 @@ update = 1;
 				}
   	            break;
   	        case 'N' :
+				currValues[8] = decodedValue;
   	            if(((decodedValue >> j) & 0x01) == 0){   
       	            pwmHomePenaltyTopMinutes.setPin(i, 0, 0);
                     
@@ -307,6 +229,7 @@ update = 1;
 				}
   	            break;
   	        case 'M' :
+				currValues[9] = decodedValue;
   	            if(((decodedValue >> j) & 0x01) == 0){   
       	            pwmHomePenaltyTopSeconds.setPin(i, 0, 0);
   	            } else {
@@ -318,6 +241,7 @@ update = 1;
 				}
   	            break;
   	        case 'L' :
+				currValues[10] = decodedValue;
   	            if(((decodedValue >> j) & 0x01) == 0){   
       	            pwmHomePenaltyTopSeconds.setPin(i, 0, 0);
   	            } else {
@@ -329,6 +253,7 @@ update = 1;
 				}
   	            break;
   	        case 'T' :
+				currValues[11] = decodedValue;
   	            if(((decodedValue >> j) & 0x01) == 0){   
       	            pwmHomePenaltyBottomMinutes.setPin(i, 0, 0);
   	            } else {
@@ -340,6 +265,7 @@ update = 1;
 				}
   	            break;
   	        case 'S' :
+				currValues[12] = decodedValue;
   	            if(((decodedValue >> j) & 0x01) == 0){   
       	            pwmHomePenaltyBottomSeconds.setPin(i, 0, 0);
   	            } else {
@@ -351,6 +277,7 @@ update = 1;
 				}
   	            break;
   	        case 'R' :
+				currValues[13] = decodedValue;
   	            if(((decodedValue >> j) & 0x01) == 0){   
       	            pwmHomePenaltyBottomSeconds.setPin(i, 0, 0);
   	            } else {
@@ -362,6 +289,7 @@ update = 1;
 				}
   	            break;
   	        case 'K' :
+				currValues[14] = decodedValue;
   	            if(((decodedValue >> j) & 0x01) == 0){   
       	            pwmAwayPenaltyTopMinutes.setPin(i, 0, 0);
   	            } else {
@@ -373,6 +301,7 @@ update = 1;
 				}
   	            break;
   	        case 'J' :
+				currValues[15] = decodedValue;
   	            if(((decodedValue >> j) & 0x01) == 0){   
       	            pwmAwayPenaltyTopSeconds.setPin(i, 0, 0);
   	            } else {
@@ -384,6 +313,7 @@ update = 1;
 				}
   	            break;
   	        case 'I' :
+				currValues[16] = decodedValue;
   	            if(((decodedValue >> j) & 0x01) == 0){   
       	            pwmAwayPenaltyTopSeconds.setPin(i, 0, 0);
   	            } else {
@@ -395,6 +325,7 @@ update = 1;
 				}
   	            break;
   	        case 'Q' :
+				currValues[17] = decodedValue;
   	            if(((decodedValue >> j) & 0x01) == 0){   
       	            pwmAwayPenaltyBottomMinutes.setPin(i, 0, 0);
   	            } else {
@@ -406,6 +337,7 @@ update = 1;
 				}
   	            break;
   	        case 'P' :
+				currValues[18] = decodedValue;
   	            if(((decodedValue >> j) & 0x01) == 0){   
       	            pwmAwayPenaltyBottomSeconds.setPin(i, 0, 0);
   	            } else {
@@ -417,6 +349,7 @@ update = 1;
 				}
   	            break;
   	        case 'O' :
+				currValues[19] = decodedValue;
   	            if(((decodedValue >> j) & 0x01) == 0){   
       	            pwmAwayPenaltyBottomSeconds.setPin(i, 0, 0);
   	            } else {
@@ -428,6 +361,11 @@ update = 1;
 				}
   	            break;
   	        case 'U' :
+				currValues[20] = decodedValue;
+				if(j == 0)
+				{
+					updateBrightness(newBrightness); //Update LED brightness in between periods
+				}
   	            if(((decodedValue >> j) & 0x01) == 0){   
                         pwmPeriod.setPin(i, 0, 0);
   	            } 
@@ -450,8 +388,6 @@ update = 1;
 }   //end loop
 
 unsigned char sevenSegDecode(unsigned char number){
-	//TODO
-	//Check with matt about different display mappings (see display.xlsx)
 	unsigned char decoded = 0;  //Consists of 1's and 0's that map to a segment of the display
 	//Time, Penalties, and Score 10s digit: decodeType = 2 for normal and 3 for inverted. Pattern is XBACGFED
 	//Time and Score 1s digit: decodeType = 1 for normal and 4 for inverted. Pattern is XDCBGAFE
@@ -611,16 +547,27 @@ unsigned char sevenSegDecode(unsigned char number){
 
 
 void serialEvent1() {
-  //TODO Change back to Serial1
   while (Serial.available()) {
+	//Recieve data in on RX and send it out on TX to next Arduino
     char inChar = (char)Serial.read();
-    //Serial1.print(inChar);
+    Serial.print(inChar);
 
     int number = inChar - '0';
     if (inChar == '/'){
       number = -1;
     }
-
+	//Horn
+	if(currentAddr == 'V')
+	{
+		chipAddr = currentAddr;
+		writeValue = number;
+	}
+	// Brightness Update
+	else if(currentAddr == 'Y')
+	{
+		newBrightness = inChar;
+	}
+	
 	// If a number, display. Else set it as address.
     if (number < 10 && number >= -1){
 	  switch(currentAddr){
@@ -792,15 +739,7 @@ void serialEvent1() {
 		  decodeType = 6;
 		  dotPin = -1;
 		  break;
-		//Horn
-		case 'V':
-		  chipAddr = currentAddr;
-		  writeValue = number;
-		  //chipPins;
-		  
-		  break;
 	  }
-	  
       currentAddr = 'Z';
       update = 1;
     }
@@ -809,5 +748,223 @@ void serialEvent1() {
 
   }
   serialRX = true;
+}
+
+void updateBrightness(int tempBrightness)
+{
+  	for (int i = 1; i < 8; i ++){  
+		if(((decodedValue >> i) & 0x01) == 0){   
+			pwmHomeScore.setPin(i, 0, 0);
+		} else {
+			pwmHomeScore.setPin(i, tempBrightness, 0);
+		}
+		if(i == 6)
+		{
+			pwmHomeScore.setPin(dotPin, tempBrightness, 0);
+		}
+		
+		if(((decodedValue >> i) & 0x01) == 0){   
+			pwmHomeScore.setPin(i+7, 0, 0);
+		} else {
+			pwmHomeScore.setPin(i+7, tempBrightness, 0);
+		}
+		if(i == 6)
+		{
+			pwmHomeScore.setPin(dotPin, tempBrightness, 0);
+		}
+		
+		if(((decodedValue >> i) & 0x01) == 0){   
+			pwmVisitorScore.setPin(i, 0, 0);
+		} else {
+			pwmVisitorScore.setPin(i, tempBrightness, 0);
+		}
+		if(i == 6)
+		{
+			pwmVisitorScore.setPin(dotPin, tempBrightness, 0);
+		}
+		
+		if(((decodedValue >> i) & 0x01) == 0){   
+			pwmVisitorScore.setPin(i+7, 0, 0);
+		} else {
+			pwmVisitorScore.setPin(i+7, tempBrightness, 0);
+		}
+		if(i == 6)
+		{
+			pwmVisitorScore.setPin(dotPin, tempBrightness, 0);
+		}
+		
+		if(((decodedValue >> i) & 0x01) == 0){   
+			pwmTimeMinutes.setPin(i, 0, 0);
+		} else {
+			pwmTimeMinutes.setPin(i, tempBrightness, 0);
+		}
+		if(i == 6)
+		{
+			pwmTimeMinutes.setPin(dotPin, tempBrightness, 0);
+		}
+		
+		if(((decodedValue >> i) & 0x01) == 0){   
+			pwmTimeMinutes.setPin(i+7, 0, 0);
+		} else {
+			pwmTimeMinutes.setPin(i+7, tempBrightness, 0);
+		}
+		if(i == 6)
+		{
+			pwmTimeMinutes.setPin(dotPin, tempBrightness, 0);
+		}
+		
+		if(((decodedValue >> i) & 0x01) == 0){   
+			pwmTimeSeconds.setPin(i, 0, 0);
+		} else {
+			pwmTimeSeconds.setPin(i, tempBrightness, 0);
+		}
+		if(i == 6)
+		{
+			pwmTimeSeconds.setPin(dotPin, tempBrightness, 0);
+		}
+		
+		if(((decodedValue >> i) & 0x01) == 0){   
+			pwmTimeSeconds.setPin(i+7, 0, 0);
+		} else {
+			pwmTimeSeconds.setPin(i+7, tempBrightness, 0);
+		}
+		if(i == 6)
+		{
+			pwmTimeSeconds.setPin(dotPin, tempBrightness, 0);
+		}
+		
+		if(((decodedValue >> i) & 0x01) == 0){   
+			pwmHomePenaltyTopMinutes.setPin(i, 0, 0);
+			
+		} else {
+			pwmHomePenaltyTopMinutes.setPin(i, tempBrightness, 0);
+				
+		}
+		if(i == 6)
+		{
+			pwmHomePenaltyTopMinutes.setPin(dotPin, tempBrightness, 0);
+		}
+		
+		if(((decodedValue >> i) & 0x01) == 0){   
+			pwmHomePenaltyTopSeconds.setPin(i, 0, 0);
+		} else {
+			pwmHomePenaltyTopSeconds.setPin(i, tempBrightness, 0);
+		}
+		if(i == 6)
+		{
+			pwmHomePenaltyTopSeconds.setPin(dotPin, tempBrightness, 0);
+		}
+		
+		if(((decodedValue >> i) & 0x01) == 0){   
+			pwmHomePenaltyTopSeconds.setPin(i+7, 0, 0);
+		} else {
+			pwmHomePenaltyTopSeconds.setPin(i+7, tempBrightness, 0);
+		}
+		if(i == 6)
+		{
+			pwmHomePenaltyTopSeconds.setPin(dotPin, tempBrightness, 0);
+		}
+		
+		if(((decodedValue >> i) & 0x01) == 0){   
+			pwmHomePenaltyBottomMinutes.setPin(i, 0, 0);
+		} else {
+			pwmHomePenaltyBottomMinutes.setPin(i, tempBrightness, 0);
+		}
+		if(i == 6)
+		{
+			pwmHomePenaltyBottomMinutes.setPin(dotPin, tempBrightness, 0);
+		}
+		
+		if(((decodedValue >> i) & 0x01) == 0){   
+			pwmHomePenaltyBottomSeconds.setPin(i, 0, 0);
+		} else {
+			pwmHomePenaltyBottomSeconds.setPin(i, tempBrightness, 0);
+		}
+		if(i == 6)
+		{
+			pwmHomePenaltyBottomSeconds.setPin(dotPin, tempBrightness, 0);
+		}
+		
+		if(((decodedValue >> i) & 0x01) == 0){   
+			pwmHomePenaltyBottomSeconds.setPin(i+7, 0, 0);
+		} else {
+			pwmHomePenaltyBottomSeconds.setPin(i+7, tempBrightness, 0);
+		}
+		if(i == 6)
+		{
+			pwmHomePenaltyBottomSeconds.setPin(dotPin, tempBrightness, 0);
+		}
+		
+		if(((decodedValue >> i) & 0x01) == 0){   
+			pwmAwayPenaltyTopMinutes.setPin(i, 0, 0);
+		} else {
+			pwmAwayPenaltyTopMinutes.setPin(i, tempBrightness, 0);
+		}
+		if(i == 6)
+		{
+			pwmAwayPenaltyTopMinutes.setPin(dotPin, tempBrightness, 0);
+		}
+		
+		if(((decodedValue >> i) & 0x01) == 0){   
+			pwmAwayPenaltyTopSeconds.setPin(i, 0, 0);
+		} else {
+			pwmAwayPenaltyTopSeconds.setPin(i, tempBrightness, 0);
+		}
+		if(i == 6)
+		{
+			pwmAwayPenaltyTopSeconds.setPin(dotPin, tempBrightness, 0);
+		}
+		
+		if(((decodedValue >> i) & 0x01) == 0){   
+			pwmAwayPenaltyTopSeconds.setPin(i+7, 0, 0);
+		} else {
+			pwmAwayPenaltyTopSeconds.setPin(i+7, tempBrightness, 0);
+		}
+		if(i == 6)
+		{
+			pwmAwayPenaltyTopSeconds.setPin(dotPin, tempBrightness, 0);
+		}
+		
+		if(((decodedValue >> i) & 0x01) == 0){   
+			pwmAwayPenaltyBottomMinutes.setPin(i, 0, 0);
+		} else {
+			pwmAwayPenaltyBottomMinutes.setPin(i, tempBrightness, 0);
+		}
+		if(i == 6)
+		{
+			pwmAwayPenaltyBottomMinutes.setPin(dotPin, tempBrightness, 0);
+		}
+
+		if(((decodedValue >> i) & 0x01) == 0){   
+			pwmAwayPenaltyBottomSeconds.setPin(i, 0, 0);
+		} else {
+			pwmAwayPenaltyBottomSeconds.setPin(i, tempBrightness, 0);
+		}
+		if(i == 6)
+		{
+			pwmAwayPenaltyBottomSeconds.setPin(dotPin, tempBrightness, 0);
+		}
+
+		if(((decodedValue >> i) & 0x01) == 0){   
+			pwmAwayPenaltyBottomSeconds.setPin(i+7, 0, 0);
+		} else {
+			pwmAwayPenaltyBottomSeconds.setPin(i+7, tempBrightness, 0);
+		}
+		if(i == 6)
+		{
+			pwmAwayPenaltyBottomSeconds.setPin(dotPin, tempBrightness, 0);
+		}
+
+		if(((decodedValue >> i) & 0x01) == 0){   
+				pwmPeriod.setPin(i, 0, 0);
+		} 
+			else {
+				pwmPeriod.setPin(i, tempBrightness, 0);
+		}
+		if(i == 6)
+		{
+			pwmPeriod.setPin(dotPin, tempBrightness, 0);
+		}
+  	} // end for
 }
 
