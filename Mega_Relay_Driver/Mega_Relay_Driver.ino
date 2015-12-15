@@ -6,12 +6,13 @@ unsigned char update = 0; 	//flag set when new data received from ref-controller
 unsigned char chipAddr = 0; //Address of chip to update
 unsigned char writeValue = 0; //Value to be displayed
 char chipStartPin = 0; //Pin corresponding to starting location of the display being updated at the given chip address
-int brightness = 0; 
+int brightness = 100; 
 char newBrightness = 0;
 char dotPin = 0;  //Pin corresponding to the dot, -1 if no dot
 char decodeType = -1; //There are two different pin mappings for display depending on single digit or two digits
-					  //value is used for decoding each type. 0 is one digit by itself, 1 is first digit of two, 2 is second digit of two, 3 is 10s inverted, 4 is 1s inverted
+				  //value is used for decoding each type. 0 is one digit by itself, 1 is first digit of two, 2 is second digit of two, 3 is 10s inverted, 4 is 1s inverted
 boolean serialRX = false;
+int num = 0;
 boolean mainController = false; //For use when detecting brightness
 int currValues [22]; // Array of most recent value for each display for use in brightness logic
 
@@ -40,7 +41,7 @@ void setup() {
   int sensorValue = analogRead(A0);
   brightness = sensorValue * 4;
   
-  for(int i = 0; i < currValues.length(); i++)
+  for(int i = 0; i < 22; i++)
   {
 	currValues[i] = 0;
   }
@@ -79,16 +80,17 @@ void setup() {
 void loop() {
     unsigned char decodedValue = 0;
     int i, j;
-/*	
-  if (serialRX && Debugger){
-	Serial.println(chipAddr);
-    Serial.println(writeValue);
-	Serial.println(chipPins);
-    serialRX = false;
-  }  
-  */
+    boolean Debugger = true;
+    
+//  if (serialRX && Debugger){
+//      Serial.println(chipAddr);
+//      Serial.println(writeValue);
+//      Serial.println(chipStartPin);
+      //serialRX = false;
+//  }  
+  
   //TODO handle brightness logic 
-  if(mainController)
+  /*if(mainController)
   {
 	int sensorValue = analogRead(A0);
 	newBrightness = sensorValue / 4; //Reduce to size of char for serial transport
@@ -103,8 +105,9 @@ void loop() {
 		updateBrightness(tempBrightness);
 	}
   }
-  
-  
+  */
+  Serial.println("ChipAddr at Loop Case:");
+  Serial.println(chipAddr);
   //Display update logic
   if (update == 1){
 	if(chipAddr == 'V')
@@ -115,13 +118,14 @@ void loop() {
   	
   	//Decode the display value
   	decodedValue = sevenSegDecode(writeValue);
-  	Serial.println(decodedValue);
+
   	//Write the value to the display
-    j = 0;
+        j = 0;
   	for (i = chipStartPin; i < chipStartPin + 7; i ++){  
   	    //case statement to determine which pwm object to apply changes to based on chipAddr
   	    switch(chipAddr){
   	        case 'H' :
+                    Serial.println("Home Score 10s");
 				currValues[0] = decodedValue;
   	            if(((decodedValue >> j) & 0x01) == 0){   
       	            pwmHomeScore.setPin(i, 0, 0);
@@ -134,6 +138,7 @@ void loop() {
 				}
   	            break;
   	        case 'G' :
+                    Serial.println("Home Score 1s");
 				currValues[1] = decodedValue;
   	            if(((decodedValue >> j) & 0x01) == 0){   
       	            pwmHomeScore.setPin(i, 0, 0);
@@ -383,10 +388,10 @@ void loop() {
   	    }   //end case
   	    j ++;
   	} // end for
-  	  	
+        Serial.print("Decoded Value:");
+  	Serial.println(decodedValue);  	
   	update = 0;	//clear the flag, wait for next update
   } //end update block
-  delay(1000);
   
 }   //end loop
 
@@ -549,12 +554,16 @@ unsigned char sevenSegDecode(unsigned char number){
 }
 
 
-void serialEvent1() {
-  while (Serial.available()) {
+void serialEvent() {
+  //while (Serial.available()) {
+    if(num < 2)
+    {
+        
+    
 	//Recieve data in on RX and send it out on TX to next Arduino
     char inChar = (char)Serial.read();
     Serial.print(inChar);
-
+    
     int number = inChar - '0';
     if (inChar == '/'){
       number = -1;
@@ -564,6 +573,7 @@ void serialEvent1() {
 	{
 		chipAddr = currentAddr;
 		writeValue = number;
+        
 	}
 	// Brightness Update
 	else if(currentAddr == 'Y')
@@ -584,7 +594,8 @@ void serialEvent1() {
 		  break;
 		//Home Score 1s
 		case 'G':
-		  chipAddr = currentAddr;
+                  Serial.println("Received G ");
+		  chipAddr = 'G';
 		  writeValue = number;
 		  chipStartPin = 8;	//8-14
 		  decodeType = 1;
@@ -626,16 +637,16 @@ void serialEvent1() {
 		case 'D':
 		  chipAddr = currentAddr;
 		  writeValue = number;
-		  chipStartPin = 1;	//1-7
-		  decodeType = 3;
+		  chipStartPin = 8;	//1-7
+		  decodeType = 4;
 		  dotPin = -1;
 		  break;
 		//Time Seconds 10s
 		case 'C':
 		  chipAddr = currentAddr;
 		  writeValue = number;
-		  chipStartPin = 8;	//8-14
-		  decodeType = 4;
+		  chipStartPin = 1;	//8-14
+		  decodeType = 3;
 		  dotPin = 15;
 		  break;
 		//Home Penalty Top Minutes 1s
@@ -743,13 +754,16 @@ void serialEvent1() {
 		  dotPin = -1;
 		  break;
 	  }
+      Serial.println("ChipAddr at End of Case:");
+      Serial.println(chipAddr);
       currentAddr = 'Z';
       update = 1;
     }
 
     currentAddr = inChar;
-
+    num++;
   }
+  num = 0;
   serialRX = true;
 }
 

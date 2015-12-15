@@ -4,6 +4,7 @@
 #include "Adafruit_GFX.h"
 Adafruit_7segment gameMatrix = Adafruit_7segment();
 Adafruit_7segment globalMatrix = Adafruit_7segment();
+#include "Event.h"
 #include "Timer.h"
 
 Timer t;
@@ -115,7 +116,7 @@ void setup() {
       pinMode(count, INPUT_PULLUP);
     }
   }
-  Serial.print("WAKE UP!");
+  //Serial.print("WAKE UP!");
   delay(1000);
   //Wake everything up
   for(byte i = 0; i <= 3; i++){
