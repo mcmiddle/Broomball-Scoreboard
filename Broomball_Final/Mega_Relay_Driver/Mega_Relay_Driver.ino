@@ -357,7 +357,7 @@ void loop() {
           else if (value == 2){brightness = 200;}
           else if (value == 3){brightness = 300;}
           else if (value == 4){brightness = 400;}
-          else if {brightness = (value - 4)*500;}
+          else {brightness = (value - 4)*500;}
       	  
         
          } else /*display update*/ {
