@@ -14,7 +14,7 @@ Timer updateBlink;
 DS3231 Clock;
 
 boolean debugOnValue = false;
- char brightness = 1;
+ char brightness = 12;
 
 // [pin#, pressed, active]
 static byte homeScoreUp[3] = {
