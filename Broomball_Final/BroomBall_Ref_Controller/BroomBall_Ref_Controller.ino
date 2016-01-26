@@ -317,24 +317,36 @@ void changeClocks() {
     }
   }
   if(visitMinor[1]){
-    if(changingGlobalClock && changeGlobalClock <= 1430){
+    //reduce period
+    if (period > 1){
+     period = period - 1;
+        setPeriod();
+    }
+    
+    /*if(changingGlobalClock && changeGlobalClock <= 1430){
       changeGlobalClock = changeGlobalClock + 10;
     } 
     else {
       if (changeGameClock <= 1790) {
         changeGameClock = changeGameClock + 10;
       }
-    }
+    }*/
   }
   if(visitMajor[1]){
-    if(changingGlobalClock && changeGlobalClock >= 10){
+    //increase period
+    if (period < 3){
+     period = period + 1;
+        setPeriod();
+    }
+    
+    /*if(changingGlobalClock && changeGlobalClock >= 10){
       changeGlobalClock = changeGlobalClock - 10;
     } 
     else {
       if (changeGameClock >= 10) {
         changeGameClock = changeGameClock - 10;
       }
-    }
+    }*/
   }
   if(homeMinor[1]){
     /*if(changingGlobalClock){
