@@ -355,7 +355,7 @@ void changeClocks() {
     else {
       changeGameClock = 900;
     }*/
-    if(brightness < 8){
+    if(brightness < 12){
       brightness = brightness +1;
       Serial.print('Y');
       Serial.print(brightness);
