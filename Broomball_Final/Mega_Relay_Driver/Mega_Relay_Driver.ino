@@ -3,7 +3,7 @@
 #include <Adafruit_PWMServoDriver.h>
 #include <QueueArray.h>
 
-int brightness = 500; 
+int brightness = 4000; 
 QueueArray <char> serialQueue;
 
 //Consists of 1's and 0's that map to a segment of the display
