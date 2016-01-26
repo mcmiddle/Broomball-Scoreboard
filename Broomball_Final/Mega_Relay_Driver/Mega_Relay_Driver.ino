@@ -353,7 +353,11 @@ void loop() {
         
          if (addr == 'Y'){
           //brightness stuff  
-          brightness = value*500;
+          if (value == 1){brightness = 100;}
+          else if (value == 2){brightness = 200;}
+          else if (value == 3){brightness = 300;}
+          else if (value == 4){brightness = 400;}
+          else if {brightness = (value - 4)*500;}
       	  
         
          } else /*display update*/ {
