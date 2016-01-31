@@ -32,15 +32,24 @@ void serialEvent(){
       data = (char)Serial.read();
       
       if (addr == 'Y'){
-	//Serial.print('Y');
-	//Serial.print(data); //Use write instead of print to send raw data
         Serial1.print('Y');
 	Serial1.print(data); 
         Serial2.write('Y');
 	Serial2.print(data); 
         Serial3.print('Y');
 	Serial3.print(data); 
-      } else if (addr == 'V'){
+      } 
+	  //Send reset signal to all chips
+	  else if(addr == 'Z'){
+			Serial1.print(addr);
+			Serial1.print(data);
+			Serial2.print(addr);
+			Serial2.print(data);
+			Serial3.print(addr);
+			Serial3.print(data);
+			delay(1000); // Wait until it comes back up
+	  }
+		else if (addr == 'V'){
         if (data == '8'){
           digitalWrite(24,HIGH);
         } else {

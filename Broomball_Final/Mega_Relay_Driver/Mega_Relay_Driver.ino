@@ -2,6 +2,17 @@
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
 #include <QueueArray.h>
+#include <avr/wdt.h>
+
+void wdt_init(void) __attribute__((naked)) __attribute__((section(".init3")));
+// Function Implementation
+void wdt_init(void)
+{
+    MCUSR = 0;
+    wdt_disable();
+
+    return;
+}
 
 int brightness = 4000; 
 QueueArray <char> serialQueue;
@@ -360,7 +371,9 @@ void loop() {
           else {brightness = (value - 4)*500;}
       	  
         
-         } else /*display update*/ {
+         } 
+		 
+		 else /*display update*/ {
           index = addr - 'A';
           
           startPin =  bank[index][0];
@@ -615,6 +628,10 @@ void serialEvent() {
         value = -1;
       }
     }
+	else if(addr == 'Z'){
+		wdt_enable(WDTO_15MS);
+		for(;;){}; //Should shut down here
+	}
     
     //enqueue for use in loop
     serialQueue.enqueue(addr);

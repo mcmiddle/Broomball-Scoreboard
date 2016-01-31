@@ -64,7 +64,7 @@ void printTime(){
   }
   Serial.print("E");
   if (A == 0 && B == 0){
-    Serial.print('/');
+    Serial.print(0);
   } 
   else {
     Serial.print(B);
@@ -509,4 +509,7 @@ void removePenalty(byte side, byte row){
   }
 }
 
-
+void sendReset(){
+  Serial.print("Z/");
+  delay(1000);
+}

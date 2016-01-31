@@ -132,6 +132,8 @@ void setup() {
     }
     delay (1000);
   }
+  sendReset();
+  
   printTime();
   printPenalty();
   printScore();
@@ -241,8 +243,18 @@ void loop() {
       }
     }
   }
-
-  if(startTime[2] && stopTime[1] || stopTime[2] && startTime[1]){
+  //TODO Double Check This
+  //If both red and green are pressed and are in time changing mode then reset and resend values
+  if (changingTime && (startTime[2] && stopTime[1] || stopTime[2] && startTime[1])){
+	sendReset();
+  
+	printTime();
+	printPenalty();
+	printScore();
+	setPeriod();
+	turnOffHorn();
+  }
+  else if(startTime[2] && stopTime[1] || stopTime[2] && startTime[1]){
     resetGame();
   }
 
