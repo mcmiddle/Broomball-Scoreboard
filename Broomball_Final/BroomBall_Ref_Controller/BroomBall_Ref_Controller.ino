@@ -242,21 +242,14 @@ void loop() {
         blinkEvent = updateBlink.every(250, changeTimeBlink);
       }
     }
+    if(startTime[2] && stopTime[1] || stopTime[2] && startTime[1]){
+      resetGame();
+    }
+
+    
   }
-  //TODO Double Check This
-  //If both red and green are pressed and are in time changing mode then reset and resend values
-  if (changingTime && (startTime[2] && stopTime[1] || stopTime[2] && startTime[1])){
-	sendReset();
   
-	printTime();
-	printPenalty();
-	printScore();
-	setPeriod();
-	turnOffHorn();
-  }
-  else if(startTime[2] && stopTime[1] || stopTime[2] && startTime[1]){
-    resetGame();
-  }
+  
 
   if (debugOnValue && buttonPressed){
     debug();
@@ -271,7 +264,11 @@ void loop() {
 
 void changeClocks() {
 
-  if(startTime[1]){
+//TODO Double Check This
+  //If both red and green are pressed and are in time changing mode then reset and resend values
+
+
+   if(startTime[1]){
     changingTime = false;
     updateBlink.stop(blinkEvent);
     time = changeGameClock;
@@ -283,12 +280,24 @@ void changeClocks() {
     }
     printTime();
   }
-  if(stopTime[1]){
+  /*else if(stopTime[1]){
     changingTime = false;
     updateBlink.stop(blinkEvent);
     printTime();
-  }
+  }*/
   if(visitScoreUp[1]){ 
+    if(stopTime[2]){
+  sendReset();
+  
+  printTime();
+  printPenalty();
+  printScore();
+  setPeriod();
+  turnOffHorn();
+  }
+  
+
+    else {
     if(changingGlobalClock && changeGlobalClock <= 1439){
       changeGlobalClock = changeGlobalClock + 1;
     } 
@@ -297,6 +306,7 @@ void changeClocks() {
         changeGameClock = changeGameClock + 1;
       }
     }
+  }
   }
   if(visitScoreDown[1]){
     if(changingGlobalClock && changeGlobalClock >= 1){

@@ -34,7 +34,7 @@ void serialEvent(){
       if (addr == 'Y'){
         Serial1.print('Y');
 	Serial1.print(data); 
-        Serial2.write('Y');
+        Serial2.print('Y');
 	Serial2.print(data); 
         Serial3.print('Y');
 	Serial3.print(data); 
