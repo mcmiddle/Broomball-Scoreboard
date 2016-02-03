@@ -2,17 +2,6 @@
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
 #include <QueueArray.h>
-#include <avr/wdt.h>
-
-void wdt_init(void) __attribute__((naked)) __attribute__((section(".init3")));
-// Function Implementation
-void wdt_init(void)
-{
-    MCUSR = 0;
-    wdt_disable();
-
-    return;
-}
 
 int brightness = 4000; 
 QueueArray <char> serialQueue;
@@ -359,7 +348,7 @@ void loop() {
  
   //Display update logic
   if (serialQueue.count() >= 2){
-	 addr = serialQueue.dequeue();
+   addr = serialQueue.dequeue();
          value = serialQueue.dequeue();
         
          if (addr == 'Y'){
@@ -369,11 +358,9 @@ void loop() {
           else if (value == 3){brightness = 300;}
           else if (value == 4){brightness = 400;}
           else {brightness = (value - 4)*500;}
-      	  
+          
         
-         } 
-		 
-		 else /*display update*/ {
+         } else /*display update*/ {
           index = addr - 'A';
           
           startPin =  bank[index][0];
@@ -403,7 +390,7 @@ void loop() {
              case 0 :
                  //Write the value to the display
                   j = 6;
-  	          for (i = startPin; i < startPin + 7; i ++){  
+              for (i = startPin; i < startPin + 7; i ++){  
                     if (seven_seg_digits[decodeType][value][j] == 1){
                       pwmHomeScore.setPin(i, brightness, 0);  //turn segment on
                     } else {
@@ -421,7 +408,7 @@ void loop() {
              case 1 :
                 //Write the value to the display
                   j = 6;
-  	          for (i = startPin; i < startPin + 7; i ++){  
+              for (i = startPin; i < startPin + 7; i ++){  
                     if (seven_seg_digits[decodeType][value][j] == 1){
                       pwmVisitorScore.setPin(i, brightness, 0);  //turn segment on
                     } else {
@@ -438,7 +425,7 @@ void loop() {
              case 2 :
                //Write the value to the display
                   j = 6;
-  	          for (i = startPin; i < startPin + 7; i ++){  
+              for (i = startPin; i < startPin + 7; i ++){  
                     if (seven_seg_digits[decodeType][value][j] == 1){
                       pwmPeriod.setPin(i, brightness, 0);  //turn segment on
                     } else {
@@ -454,7 +441,7 @@ void loop() {
              case 3 :
                //Write the value to the display
                   j = 6;
-  	          for (i = startPin; i < startPin + 7; i ++){  
+              for (i = startPin; i < startPin + 7; i ++){  
                     if (seven_seg_digits[decodeType][value][j] == 1){
                       pwmTimeMinutes.setPin(i, brightness, 0);  //turn segment on
                     } else {
@@ -470,7 +457,7 @@ void loop() {
                //Write the value to the display
 
                   j = 6;
-  	          for (i = startPin; i < startPin + 7; i ++){  
+              for (i = startPin; i < startPin + 7; i ++){  
                     if (seven_seg_digits[decodeType][value][j] == 1){
                       pwmTimeSeconds.setPin(i, brightness, 0);  //turn segment on
                     } else {
@@ -485,7 +472,7 @@ void loop() {
              case 5 :
                //Write the value to the display
                   j = 6;
-  	          for (i = startPin; i < startPin + 7; i ++){  
+              for (i = startPin; i < startPin + 7; i ++){  
                     if (seven_seg_digits[decodeType][value][j] == 1){
                       pwmHomePenaltyTopMinutes.setPin(i, brightness, 0);  //turn segment on
                     } else {
@@ -500,7 +487,7 @@ void loop() {
              case 6 :
                //Write the value to the display
                   j = 6;
-  	          for (i = startPin; i < startPin + 7; i ++){  
+              for (i = startPin; i < startPin + 7; i ++){  
                     if (seven_seg_digits[decodeType][value][j] == 1){
                       pwmHomePenaltyTopSeconds.setPin(i, brightness, 0);  //turn segment on
                     } else {
@@ -515,7 +502,7 @@ void loop() {
              case 7 :
                //Write the value to the display
                   j = 6;
-  	          for (i = startPin; i < startPin + 7; i ++){  
+              for (i = startPin; i < startPin + 7; i ++){  
                     if (seven_seg_digits[decodeType][value][j] == 1){
                       pwmHomePenaltyBottomMinutes.setPin(i, brightness, 0);  //turn segment on
                     } else {
@@ -530,7 +517,7 @@ void loop() {
              case 8 :
                //Write the value to the display
                   j = 6;
-  	          for (i = startPin; i < startPin + 7; i ++){  
+              for (i = startPin; i < startPin + 7; i ++){  
                     if (seven_seg_digits[decodeType][value][j] == 1){
                       pwmHomePenaltyBottomSeconds.setPin(i, brightness, 0);  //turn segment on
                     } else {
@@ -545,7 +532,7 @@ void loop() {
              case 9 :
                //Write the value to the display
                   j = 6;
-  	          for (i = startPin; i < startPin + 7; i ++){  
+              for (i = startPin; i < startPin + 7; i ++){  
                     if (seven_seg_digits[decodeType][value][j] == 1){
                       pwmAwayPenaltyTopMinutes.setPin(i, brightness, 0);  //turn segment on
                     } else {
@@ -560,7 +547,7 @@ void loop() {
              case 10 :
                //Write the value to the display
                   j = 6;
-  	          for (i = startPin; i < startPin + 7; i ++){  
+              for (i = startPin; i < startPin + 7; i ++){  
                     if (seven_seg_digits[decodeType][value][j] == 1){
                       pwmAwayPenaltyTopSeconds.setPin(i, brightness, 0);  //turn segment on
                     } else {
@@ -575,7 +562,7 @@ void loop() {
              case 11 :
                //Write the value to the display
                   j = 6;
-  	          for (i = startPin; i < startPin + 7; i ++){  
+              for (i = startPin; i < startPin + 7; i ++){  
                     if (seven_seg_digits[decodeType][value][j] == 1){
                       pwmAwayPenaltyBottomMinutes.setPin(i, brightness, 0);  //turn segment on
                     } else {
@@ -590,7 +577,7 @@ void loop() {
              case 12 :
                //Write the value to the display
                   j = 6;
-  	          for (i = startPin; i < startPin + 7; i ++){  
+              for (i = startPin; i < startPin + 7; i ++){  
                     if (seven_seg_digits[decodeType][value][j] == 1){
                       pwmAwayPenaltyBottomSeconds.setPin(i, brightness, 0);  //turn segment on
                     } else {
@@ -628,14 +615,9 @@ void serialEvent() {
         value = -1;
       }
     }
-	else if(addr == 'Z'){
-		wdt_enable(WDTO_15MS);
-		for(;;){}; //Should shut down here
-	}
     
     //enqueue for use in loop
     serialQueue.enqueue(addr);
     serialQueue.enqueue(value); 
   }
 }
-

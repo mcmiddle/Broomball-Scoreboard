@@ -117,8 +117,14 @@ void setup() {
       pinMode(count, INPUT_PULLUP);
     }
   }
-  //Serial.print("WAKE UP!");
   delay(1000);
+
+  //reset display-controllers
+  Serial.print('Z');
+  Serial.print('/');
+  
+  //Serial.print("WAKE UP!");
+  delay(5000);
   //Wake everything up
   for(byte i = 0; i <= 3; i++){
     for(char j = 'A'; j <= 'U'; j++){
@@ -132,8 +138,6 @@ void setup() {
     }
     delay (1000);
   }
-  sendReset();
-  
   printTime();
   printPenalty();
   printScore();
@@ -242,14 +246,11 @@ void loop() {
         blinkEvent = updateBlink.every(250, changeTimeBlink);
       }
     }
-    if(startTime[2] && stopTime[1] || stopTime[2] && startTime[1]){
-      resetGame();
-    }
-
-    
   }
-  
-  
+
+  if(startTime[2] && stopTime[1] || stopTime[2] && startTime[1]){
+    resetGame();
+  }
 
   if (debugOnValue && buttonPressed){
     debug();
@@ -264,11 +265,7 @@ void loop() {
 
 void changeClocks() {
 
-//TODO Double Check This
-  //If both red and green are pressed and are in time changing mode then reset and resend values
-
-
-   if(startTime[1]){
+  if(startTime[1]){
     changingTime = false;
     updateBlink.stop(blinkEvent);
     time = changeGameClock;
@@ -280,24 +277,21 @@ void changeClocks() {
     }
     printTime();
   }
-  /*else if(stopTime[1]){
-    changingTime = false;
-    updateBlink.stop(blinkEvent);
-    printTime();
-  }*/
-  if(visitScoreUp[1]){ 
-    if(stopTime[2]){
-  sendReset();
-  
-  printTime();
-  printPenalty();
-  printScore();
-  setPeriod();
-  turnOffHorn();
-  }
-  
+  if(stopTime[1]){
+    //changingTime = false;
+    //updateBlink.stop(blinkEvent);
+    //printTime();
+    Serial.print('Z');
+    Serial.print('/');
+    delay(4500);
 
-    else {
+    printTime();
+    printPenalty();
+    printScore();
+    setPeriod();
+    
+  }
+  if(visitScoreUp[1]){ 
     if(changingGlobalClock && changeGlobalClock <= 1439){
       changeGlobalClock = changeGlobalClock + 1;
     } 
@@ -306,7 +300,6 @@ void changeClocks() {
         changeGameClock = changeGameClock + 1;
       }
     }
-  }
   }
   if(visitScoreDown[1]){
     if(changingGlobalClock && changeGlobalClock >= 1){
@@ -339,7 +332,7 @@ void changeClocks() {
     }
   }
   if(visitMinor[1]){
-    //reduce period
+     //reduce period
     if (period > 1){
      period = period - 1;
         setPeriod();
@@ -415,12 +408,6 @@ void changeClocks() {
   }
 
 }
-
-
-
-
-
-
 
 
 
