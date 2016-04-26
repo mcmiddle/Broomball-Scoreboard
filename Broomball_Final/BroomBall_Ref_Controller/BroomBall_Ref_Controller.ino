@@ -14,7 +14,7 @@ Timer updateBlink;
 DS3231 Clock;
 
 boolean debugOnValue = false;
- char brightness = 12;
+char brightness = 12;
 
 // [pin#, pressed, active]
 static byte homeScoreUp[3] = {
@@ -275,16 +275,21 @@ void changeClocks() {
       Clock.setMinute(changeGlobalClock%60);//Set the minute 
       Clock.setHour(changeGlobalClock/60);  //Set the hour 
     }
-    printTime();
+    printTime();  
   }
   if(stopTime[1]){
     //changingTime = false;
     //updateBlink.stop(blinkEvent);
     //printTime();
+    
+    // Send Hardware Reset
     Serial.print('Z');
     Serial.print('/');
-    delay(4500);
-
+    delay(6000);
+    
+    Serial.print('Y');
+    Serial.print(brightness);
+    
     printTime();
     printPenalty();
     printScore();

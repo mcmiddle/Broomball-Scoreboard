@@ -303,12 +303,14 @@ void resetGame(){
   switchPeriod = 0;
   homeScore = 0;
   visitScore = 0;
+  
+  Serial.print('Y'); //Brightness update
+  Serial.print(brightness);
+  
   printTime();
   printPenalty();
   printScore();
   setPeriod();
-
-
 }
 
 void updateGlobalClock(){
